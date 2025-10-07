@@ -28,7 +28,7 @@ class PenjualanController extends Controller
             'motor_id' => 'required',
             'pelanggan_id' => 'required',
             'harga_jual' => 'required|numeric',
-            'tanggal_penjualan' => 'required|date',
+            'tanggal_jual' => 'required|date',
         ]);
 
         $motor = Motor::findOrFail($request->motor_id);
@@ -49,7 +49,7 @@ class PenjualanController extends Controller
             'harga_jual' => $request->harga_jual,
             'total_biaya' => $totalBiaya,
             'laba' => $laba,
-            'tanggal_penjualan' => $request->tanggal_penjualan,
+            'tanggal_jual' => $request->tanggal_jual,
         ]);
 
         return redirect()->route('penjualan.index')->with('success', 'Data penjualan berhasil ditambahkan');
@@ -68,7 +68,7 @@ class PenjualanController extends Controller
             'motor_id' => 'required',
             'pelanggan_id' => 'required',
             'harga_jual' => 'required|numeric',
-            'tanggal_penjualan' => 'required|date',
+            'tanggal_jual' => 'required|date',
         ]);
 
         $motor = Motor::findOrFail($request->motor_id);
@@ -82,7 +82,7 @@ class PenjualanController extends Controller
             'harga_jual' => $request->harga_jual,
             'total_biaya' => $totalBiaya,
             'laba' => $laba,
-            'tanggal_penjualan' => $request->tanggal_penjualan,
+            'tanggal_jual' => $request->tanggal_jual,
         ]);
 
         return redirect()->route('penjualan.index')->with('success', 'Data penjualan berhasil diperbarui');

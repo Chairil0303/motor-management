@@ -33,7 +33,7 @@
                         <td class="p-2 border">Rp {{ number_format($p->harga_jual, 0, ',', '.') }}</td>
                         <td class="p-2 border">Rp {{ number_format($p->total_biaya, 0, ',', '.') }}</td>
                         <td class="p-2 border text-green-600 font-semibold">Rp {{ number_format($p->laba, 0, ',', '.') }}</td>
-                        <td class="p-2 border">{{ $p->tanggal_penjualan }}</td>
+                        <td class="p-2 border">{{ $p->tanggal_jual }}</td>
                         <td class="p-2 border flex gap-2">
                             <a href="{{ route('penjualan.edit', $p->id) }}" class="text-blue-600">Edit</a>
                             <form action="{{ route('penjualan.destroy', $p->id) }}" method="POST"

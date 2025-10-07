@@ -31,8 +31,8 @@
             </div>
 
             <div>
-                <label class="block mb-1">Tanggal Penjualan</label>
-                <input type="date" name="tanggal_penjualan" class="w-full border p-2 rounded" required>
+                <label class="block mb-1">Tanggal Jual</label>
+                <input type="date" name="tanggal_jual" class="w-full border p-2 rounded" required>
             </div>
 
             <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded">Simpan</button>

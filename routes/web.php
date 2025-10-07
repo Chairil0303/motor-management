@@ -7,6 +7,8 @@ use App\Http\Controllers\PelangganController;
 use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\RestorasiController;
 use App\Http\Controllers\PenjualanController;
+use App\Http\Controllers\DashboardController;
+
 
 Route::get('/', function () {
     return view('welcome');
@@ -15,6 +17,11 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth'])
+    ->name('dashboard');
+
 
 Route::resource('motor', MotorController::class)->middleware(['auth']);
 Route::resource('pelanggan', PelangganController::class)->middleware(['auth']);
