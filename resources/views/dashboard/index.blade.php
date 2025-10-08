@@ -1,27 +1,33 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+    <h1 class="text-3xl font-bold mb-6">Dashboard Ken Motor</h1>
 
-    <!-- Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white p-4 rounded shadow">
-            <h2 class="text-gray-600 text-sm">Total Motor</h2>
-            <p class="text-2xl font-bold">{{ $totalMotor }}</p>
-        </div>
-        <div class="bg-white p-4 rounded shadow">
-            <h2 class="text-gray-600 text-sm">Total Pelanggan</h2>
-            <p class="text-2xl font-bold">{{ $totalPelanggan }}</p>
-        </div>
-        <div class="bg-white p-4 rounded shadow">
-            <h2 class="text-gray-600 text-sm">Total Penjualan</h2>
-            <p class="text-2xl font-bold">{{ $totalPenjualan }}</p>
-        </div>
-        <div class="bg-white p-4 rounded shadow">
-            <h2 class="text-gray-600 text-sm">Total Laba</h2>
-            <p class="text-2xl font-bold text-green-600">Rp {{ number_format($totalLaba, 0, ',', '.') }}</p>
+    <div class="p-4 lg:p-6">
+        <!-- Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ">
+            <div class="bg-white rounded-xl shadow p-4">
+                <h2 class="text-gray-500 text-sm">Total Motor</h2>
+                <p class="text-2xl font-bold">{{ $totalMotor }}</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4">
+                <h2 class="text-gray-500 text-sm">Total Pelanggan</h2>
+                <p class="text-2xl font-bold">{{ $totalPelanggan }}</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4">
+                <h2 class="text-gray-500 text-sm">Total Penjualan</h2>
+                <p class="text-2xl font-bold">{{ $totalPenjualan }}</p>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4">
+                <h2 class="text-gray-500 text-sm">Total Laba</h2>
+                <p class="text-2xl font-bold text-green-600">Rp {{ number_format($totalLaba, 0, ',', '.') }}</p>
+            </div>
         </div>
     </div>
+
 
     <!-- Chart -->
     <div class="bg-white p-4 rounded shadow">

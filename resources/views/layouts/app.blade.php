@@ -16,55 +16,29 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-white h-screen shadow-md fixed">
-            <div class="p-4 text-2xl font-bold border-b">🏍️ Dealer</div>
-            <nav class="mt-4">
-                <ul>
-                    <li>
-                        <a href="{{ route('dashboard') }}" class="block px-4 py-2 hover:bg-gray-200">🏠 Dashboard</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('motor.index') }}" class="block px-4 py-2 hover:bg-gray-200">🛵 Motor</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('pelanggan.index') }}" class="block px-4 py-2 hover:bg-gray-200">👤
-                            Pelanggan</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('pembelian.index') }}" class="block px-4 py-2 hover:bg-gray-200">🧾
-                            Pembelian</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('restorasi.index') }}" class="block px-4 py-2 hover:bg-gray-200">🛠️
-                            Restorasi</a>
-                    </li>
-                    <li>
-                        <a href="{{ route('penjualan.index') }}" class="block px-4 py-2 hover:bg-gray-200">💰
-                            Penjualan</a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-        @include('layouts.navigation')
+<body class="font-sans antialiased bg-gray-100">
+    <div class="flex min-h-screen">
+        {{-- Sidebar --}}
+        @include('layouts.sidebar')
 
-        <!-- Page Heading -->
-        @isset($header)
-            <header class="bg-white dark:bg-gray-800 shadow">
-                <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                    {{ $header }}
-                </div>
-            </header>
-        @endisset
+        {{-- Main Content --}}
+        <div class="flex-1 flex flex-col">
+            @include('layouts.navigation')
 
-        <!-- Page Content -->
-        <main>
-            <main class="ml-64 p-6 w-full">
+            <!-- Page Heading -->
+            @isset($header)
+                <header class="bg-white shadow">
+                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                        {{ $header }}
+                    </div>
+                </header>
+            @endisset
+
+            <!-- Page Content -->
+            <main class="p-6">
                 @yield('content')
             </main>
-        </main>
+        </div>
     </div>
 </body>
 

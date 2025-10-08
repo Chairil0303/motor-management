@@ -14,3 +14,4 @@ class Restorasi extends Model
         return $this->belongsTo(Motor::class);
     }
 }
+    

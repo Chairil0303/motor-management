@@ -1,5 +1,5 @@
 <x-guest-layout>
-    <div class="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div class="min-h-screen flex items-center justify-center px-2">
         <div class="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
 
             <!-- Logo & Title -->
@@ -17,7 +17,7 @@
 
                 <!-- Email Address -->
                 <div>
-                    <x-input-label for="email" :value="__('Email')" class="text-gray-700 font-medium" />
+                    <x-input-label for="email" :value="__('Email')" class=" font-medium" />
                     <x-text-input id="email"
                         class="block mt-1 w-full border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg"
                         type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
