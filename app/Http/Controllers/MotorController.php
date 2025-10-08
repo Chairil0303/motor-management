@@ -20,18 +20,20 @@ class MotorController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'merek' => 'required|string|max:255',
             'tipe_model' => 'required|string|max:255',
-            'tahun' => 'required|numeric',
-            'harga_beli' => 'required|numeric',
-            'kondisi' => 'nullable|string',
+            'tahun' => 'required|digits:4|integer',
+            'harga_beli' => 'required|numeric|min:0',
+            'kondisi' => 'nullable|string|max:255',
             'status' => 'required|string',
         ]);
 
-        Motor::create($request->all());
+        \App\Models\Motor::create($validated);
+
         return redirect()->route('motor.index')->with('success', 'Data motor berhasil ditambahkan!');
     }
+
 
     public function edit(Motor $motor)
     {
