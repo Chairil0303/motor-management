@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Restorasi extends Model
 {
-    protected $table = 'restorasi';
-    protected $fillable = ['motor_id', 'deskripsi', 'biaya_restorasi', 'tanggal_restorasi'];
+    use HasFactory;
+
+    protected $guarded = [];
 
     public function motor()
     {
-        return $this->belongsTo(Motor::class);
+        return $this->belongsTo(Motor::class, 'motor_id');
     }
 }
-    

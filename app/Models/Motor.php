@@ -18,6 +18,10 @@ class Motor extends Model
         'harga_beli',
         'kondisi',
         'status',
+        'plat_nomor',
+        'nama_penjual',
+        'no_telp_penjual',
+        'alamat_penjual'
     ];
 
     public function pembelian()
@@ -25,9 +29,9 @@ class Motor extends Model
         return $this->hasOne(Pembelian::class);
     }
 
-    public function restorasi()
+    public function restorasis()
     {
-        return $this->hasMany(Restorasi::class);
+        return $this->hasMany(Restorasi::class, 'motor_id');
     }
 
     public function penjualan()

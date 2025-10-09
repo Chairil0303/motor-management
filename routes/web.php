@@ -9,7 +9,6 @@ use App\Http\Controllers\RestorasiController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\DashboardController;
 
-
 Route::get('/', function () {
     return view('welcome');
 });
@@ -21,6 +20,12 @@ Route::get('/dashboard', function () {
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth'])
     ->name('dashboard');
+
+Route::get('/restorasi/detail/{motorId}', [RestorasiController::class, 'detail'])
+    ->name('restorasi.detail');
+Route::put('restorasi/update/{id}', [RestorasiController::class, 'updateInline'])->name('restorasi.updateInline');
+Route::delete('restorasi/delete/{id}', [RestorasiController::class, 'deleteInline'])->name('restorasi.deleteInline');
+
 
 
 Route::resource('motor', MotorController::class)->middleware(['auth']);

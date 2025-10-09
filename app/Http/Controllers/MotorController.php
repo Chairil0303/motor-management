@@ -21,13 +21,20 @@ class MotorController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'merek' => 'required|string|max:255',
-            'tipe_model' => 'required|string|max:255',
+            'merek' => 'required|string',
+            'tipe_model' => 'required|string',
             'tahun' => 'required|digits:4|integer',
-            'harga_beli' => 'required|numeric|min:0',
-            'kondisi' => 'nullable|string|max:255',
+            'harga_beli' => 'required',
+            'plat_nomor' => 'required|unique:motor,plat_nomor',
+            'nama_penjual' => 'required|string',
+            'no_telp_penjual' => 'required|string',
+            'alamat_penjual' => 'required|string',
+            'kondisi' => 'nullable|string',
             'status' => 'required|string',
         ]);
+
+        // Bersihkan format harga (hilangkan titik)
+        $validated['harga_beli'] = str_replace('.', '', $validated['harga_beli']);
 
         \App\Models\Motor::create($validated);
 
@@ -35,26 +42,35 @@ class MotorController extends Controller
     }
 
 
-    public function edit(Motor $motor)
+    public function edit($id)
     {
+        $motor = \App\Models\Motor::findOrFail($id);
         return view('motor.edit', compact('motor'));
     }
 
-    public function update(Request $request, Motor $motor)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'merek' => 'required|string|max:255',
-            'tipe_model' => 'required|string|max:255',
-            'tahun' => 'required|numeric',
-            'harga_beli' => 'required|numeric',
+        $motor = \App\Models\Motor::findOrFail($id);
+
+        $validated = $request->validate([
+            'merek' => 'required|string',
+            'tipe_model' => 'required|string',
+            'tahun' => 'required|digits:4|integer',
+            'harga_beli' => 'required',
+            'plat_nomor' => 'required|unique:motor,plat_nomor,' . $motor->id,
+            'nama_penjual' => 'required|string',
+            'no_telp_penjual' => 'required|string',
+            'alamat_penjual' => 'required|string',
             'kondisi' => 'nullable|string',
             'status' => 'required|string',
         ]);
 
-        $motor->update($request->all());
+        $validated['harga_beli'] = str_replace('.', '', $validated['harga_beli']);
+
+        $motor->update($validated);
+
         return redirect()->route('motor.index')->with('success', 'Data motor berhasil diperbarui!');
     }
-
     public function destroy(Motor $motor)
     {
         $motor->delete();
