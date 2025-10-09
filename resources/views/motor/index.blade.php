@@ -21,6 +21,7 @@
                     <th class="p-2 border">Plat Nomor</th>
                     <th class="p-2 border">Harga Beli</th>
                     <th class="p-2 border">Restorasi</th>
+                    <th class="p-2 border">Harga Jual</th>
                     <th class="p-2 border">Detail</th>
                     <th class="p-2 border">Aksi</th>
                 </tr>
@@ -28,7 +29,6 @@
             <tbody>
                 @foreach ($motor as $m)
                     @php
-                        // Total biaya restorasi dari relasi
                         $totalRestorasi = $m->restorasis->sum('biaya_restorasi');
                     @endphp
                     <tr>
@@ -37,6 +37,9 @@
                         <td class="p-2 border">{{ $m->plat_nomor }}</td>
                         <td class="p-2 border">Rp {{ number_format($m->harga_beli, 0, ',', '.') }}</td>
                         <td class="p-2 border">Rp {{ number_format($totalRestorasi, 0, ',', '.') }}</td>
+                        <td class="p-2 border">
+                            {{ $m->harga_jual ? 'Rp ' . number_format($m->harga_jual, 0, ',', '.') : '-' }}
+                        </td>
                         <td class="p-2 border text-center">
                             <button onclick="openModal({{ $m->id }})"
                                 class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600">
@@ -65,6 +68,8 @@
                                 <p><strong>Plat Nomor:</strong> {{ $m->plat_nomor }}</p>
                                 <p><strong>Harga Beli:</strong> Rp {{ number_format($m->harga_beli, 0, ',', '.') }}</p>
                                 <p><strong>Total Restorasi:</strong> Rp {{ number_format($totalRestorasi, 0, ',', '.') }}</p>
+                                <p><strong>Harga Jual:</strong>
+                                    {{ $m->harga_jual ? 'Rp ' . number_format($m->harga_jual, 0, ',', '.') : '-' }}</p>
                                 <p><strong>Kondisi:</strong> {{ $m->kondisi ?? '-' }}</p>
                                 <hr>
                                 <p><strong>Nama Penjual:</strong> {{ $m->nama_penjual }}</p>

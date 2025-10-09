@@ -59,6 +59,13 @@
                     value="{{ number_format($motor->harga_beli, 0, ',', '.') }}" required>
             </div>
 
+            {{-- Harga Jual --}}
+            <div class="mb-4">
+                <label class="block font-semibold mb-1">Harga Jual</label>
+                <input type="text" name="harga_jual" id="harga_jual" class="w-full border rounded px-3 py-2"
+                    value="{{ $motor->harga_jual ? number_format($motor->harga_jual, 0, ',', '.') : '' }}">
+            </div>
+
             {{-- Plat Nomor --}}
             <div class="mb-4">
                 <label class="block font-semibold mb-1">Plat Nomor</label>
@@ -120,6 +127,16 @@
             let value = e.target.value.replace(/\D/g, '');
             value = new Intl.NumberFormat('id-ID').format(value);
             e.target.value = value;
+        });
+        const hargaBeli = document.getElementById('harga_beli');
+        const hargaJual = document.getElementById('harga_jual');
+
+        [hargaBeli, hargaJual].forEach(input => {
+            input.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                value = new Intl.NumberFormat('id-ID').format(value);
+                e.target.value = value;
+            });
         });
     </script>
 @endsection

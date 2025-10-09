@@ -50,27 +50,36 @@ class MotorController extends Controller
 
     public function update(Request $request, $id)
     {
-        $motor = \App\Models\Motor::findOrFail($id);
+        $motor = Motor::findOrFail($id);
 
-        $validated = $request->validate([
-            'merek' => 'required|string',
-            'tipe_model' => 'required|string',
-            'tahun' => 'required|digits:4|integer',
+        $request->validate([
+            'merek' => 'required',
+            'tipe_model' => 'required',
+            'tahun' => 'required',
             'harga_beli' => 'required',
-            'plat_nomor' => 'required|unique:motor,plat_nomor,' . $motor->id,
-            'nama_penjual' => 'required|string',
-            'no_telp_penjual' => 'required|string',
-            'alamat_penjual' => 'required|string',
-            'kondisi' => 'nullable|string',
-            'status' => 'required|string',
+            'plat_nomor' => 'required',
         ]);
 
-        $validated['harga_beli'] = str_replace('.', '', $validated['harga_beli']);
+        $hargaBeli = str_replace('.', '', $request->harga_beli);
+        $hargaJual = $request->harga_jual ? str_replace('.', '', $request->harga_jual) : null;
 
-        $motor->update($validated);
+        $motor->update([
+            'merek' => $request->merek,
+            'tipe_model' => $request->tipe_model,
+            'tahun' => $request->tahun,
+            'harga_beli' => $hargaBeli,
+            'harga_jual' => $hargaJual,
+            'plat_nomor' => $request->plat_nomor,
+            'nama_penjual' => $request->nama_penjual,
+            'no_telp_penjual' => $request->no_telp_penjual,
+            'alamat_penjual' => $request->alamat_penjual,
+            'kondisi' => $request->kondisi,
+            'status' => $request->status,
+        ]);
 
-        return redirect()->route('motor.index')->with('success', 'Data motor berhasil diperbarui!');
+        return redirect()->route('motor.index')->with('success', 'Data motor berhasil diperbarui');
     }
+
     public function destroy(Motor $motor)
     {
         $motor->delete();

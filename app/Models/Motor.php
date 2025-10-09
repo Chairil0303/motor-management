@@ -21,7 +21,8 @@ class Motor extends Model
         'plat_nomor',
         'nama_penjual',
         'no_telp_penjual',
-        'alamat_penjual'
+        'alamat_penjual',
+        'harga_jual',
     ];
 
     public function pembelian()
