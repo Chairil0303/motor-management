@@ -4,7 +4,7 @@
     <div class="container mx-auto p-6">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">Data Motor</h1>
-            <a href="{{ route('motor.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">+ Tambah Motor</a>
+            <!-- <a href="{{ route('motor.create') }}" class="bg-blue-500 text-white px-4 py-2 rounded">+ Tambah Motor</a> -->
         </div>
 
         @if(session('success'))

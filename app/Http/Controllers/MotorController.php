@@ -36,7 +36,15 @@ class MotorController extends Controller
         // Bersihkan format harga (hilangkan titik)
         $validated['harga_beli'] = str_replace('.', '', $validated['harga_beli']);
 
-        \App\Models\Motor::create($validated);
+        // ✅ Simpan motor hanya sekali
+        $motor = \App\Models\Motor::create($validated);
+
+        // ✅ Auto insert ke tabel pembelian
+        \App\Models\Pembelian::create([
+            'motor_id' => $motor->id,
+            'tanggal_beli' => now()->toDateString(),
+            'biaya_beli' => $validated['harga_beli'],
+        ]);
 
         return redirect()->route('motor.index')->with('success', 'Data motor berhasil ditambahkan!');
     }
