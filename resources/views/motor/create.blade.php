@@ -89,16 +89,6 @@
                     placeholder="Contoh: Mulus, Bekas, Perlu servis">
             </div>
 
-            {{-- Status --}}
-            <div class="mb-6">
-                <label class="block font-semibold mb-1">Status</label>
-                <select name="status" class="w-full border rounded px-3 py-2">
-                    <option value="baru masuk" selected>Baru Masuk</option>
-                    <option value="siap jual">Siap Jual</option>
-                    <option value="tersedia">Tersedia</option>
-                    <option value="terjual">Terjual</option>
-                </select>
-            </div>
 
             <div class="flex justify-end gap-2">
                 <a href="{{ route('motor.index') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Batal</a>

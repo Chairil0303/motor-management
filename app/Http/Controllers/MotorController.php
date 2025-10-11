@@ -7,11 +7,26 @@ use Illuminate\Http\Request;
 
 class MotorController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $motor = Motor::all();
+        $query = Motor::query();
+
+        // Search by plat nomor
+        if ($request->filled('search')) {
+            $query->where('plat_nomor', 'like', '%' . $request->search . '%');
+        }
+
+        // Filter status
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $motor = $query->paginate(20); // pagination 20 per halaman
+
         return view('motor.index', compact('motor'));
     }
+
+
 
     public function create()
     {
@@ -30,7 +45,6 @@ class MotorController extends Controller
             'no_telp_penjual' => 'required|string',
             'alamat_penjual' => 'required|string',
             'kondisi' => 'nullable|string',
-            'status' => 'required|string',
         ]);
 
         // Bersihkan format harga (hilangkan titik)
@@ -82,11 +96,13 @@ class MotorController extends Controller
             'no_telp_penjual' => $request->no_telp_penjual,
             'alamat_penjual' => $request->alamat_penjual,
             'kondisi' => $request->kondisi,
-            'status' => $request->status,
+            // ✅ kalau status nggak dikirim dari form, tetap pakai status lama
+            'status' => $request->status ?? $motor->status,
         ]);
 
         return redirect()->route('motor.index')->with('success', 'Data motor berhasil diperbarui');
     }
+
 
     public function destroy(Motor $motor)
     {

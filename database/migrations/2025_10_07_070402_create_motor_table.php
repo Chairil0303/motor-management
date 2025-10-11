@@ -14,14 +14,18 @@ return new class extends Migration {
             $table->year('tahun');
             $table->decimal('harga_beli', 15, 2);
             $table->decimal('harga_jual', 15, 2)->nullable();
-            $table->string('plat_nomor')->unique(); // ✅ plat nomor
-            $table->string('nama_penjual');         // ✅ nama penjual
-            $table->string('no_telp_penjual');      // ✅ no telp penjual
-            $table->text('alamat_penjual');         // ✅ alamat penjual
+            $table->string('plat_nomor')->unique();
+            $table->string('nama_penjual');
+            $table->string('no_telp_penjual');
+            $table->text('alamat_penjual');
             $table->string('kondisi')->nullable();
-            $table->string('status')->default('tersedia');
+
+            // 🔥 ENUM untuk status: hanya bisa 'tersedia' atau 'terjual'
+            $table->enum('status', ['tersedia', 'terjual'])->default('tersedia');
+
             $table->timestamps();
         });
+
     }
 
     public function down(): void

@@ -14,8 +14,8 @@
             </div>
         @endif
 
-
-        <form action="{{ route('motor.update', $motor->id) }}" method="POST">
+        {{-- ✅ Tambahkan id ke form --}}
+        <form id="editForm" action="{{ route('motor.update', $motor->id) }}" method="POST">
             @csrf
             @method('PUT')
 
@@ -115,27 +115,34 @@
 
             <div class="flex justify-end gap-2">
                 <a href="{{ route('motor.index') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Batal</a>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Update</button>
+                <button type="button" onclick="confirmUpdate()"
+                    class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Update</button>
             </div>
         </form>
     </div>
 
-    {{-- Format harga otomatis --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        const hargaInput = document.getElementById('harga_beli');
-        hargaInput.addEventListener('input', function (e) {
-            let value = e.target.value.replace(/\D/g, '');
-            value = new Intl.NumberFormat('id-ID').format(value);
-            e.target.value = value;
-        });
-        const hargaBeli = document.getElementById('harga_beli');
-        const hargaJual = document.getElementById('harga_jual');
+        function confirmUpdate() {
+            Swal.fire({
+                title: 'Simpan perubahan?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, simpan',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('editForm').submit();
+                }
+            });
+        }
 
-        [hargaBeli, hargaJual].forEach(input => {
+        // ✅ Format harga otomatis
+        const hargaInputs = [document.getElementById('harga_beli'), document.getElementById('harga_jual')];
+        hargaInputs.forEach(input => {
             input.addEventListener('input', function (e) {
                 let value = e.target.value.replace(/\D/g, '');
-                value = new Intl.NumberFormat('id-ID').format(value);
-                e.target.value = value;
+                e.target.value = new Intl.NumberFormat('id-ID').format(value);
             });
         });
     </script>
