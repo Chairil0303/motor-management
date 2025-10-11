@@ -4,7 +4,6 @@
     <div class="container mx-auto p-6">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">Data Penjualan</h1>
-            <a href="{{ route('penjualan.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded">+ Tambah</a>
         </div>
 
         @if(session('success'))
@@ -16,35 +15,142 @@
                 <tr>
                     <th class="p-2 border">#</th>
                     <th class="p-2 border">Motor</th>
-                    <th class="p-2 border">Pelanggan</th>
-                    <th class="p-2 border">Harga Jual</th>
-                    <th class="p-2 border">Total Biaya</th>
-                    <th class="p-2 border">Laba</th>
-                    <th class="p-2 border">Tanggal</th>
+                    <th class="p-2 border">Plat Nomor</th>
+                    <th class="p-2 border">Harga Beli</th>
+                    <th class="p-2 border">Restorasi</th>
+                    <th class="p-2 border">Total</th>
                     <th class="p-2 border">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach($penjualan as $p)
+                @foreach($motor as $m)
+                    @php
+                        $totalRestorasi = $m->restorasi->sum('biaya_restorasi');
+                        $totalModal = $m->harga_beli + $totalRestorasi;
+                    @endphp
                     <tr>
                         <td class="p-2 border">{{ $loop->iteration }}</td>
-                        <td class="p-2 border">{{ $p->motor->merek }} - {{ $p->motor->tipe_model }}</td>
-                        <td class="p-2 border">{{ $p->pelanggan->nama }}</td>
-                        <td class="p-2 border">Rp {{ number_format($p->harga_jual, 0, ',', '.') }}</td>
-                        <td class="p-2 border">Rp {{ number_format($p->total_biaya, 0, ',', '.') }}</td>
-                        <td class="p-2 border text-green-600 font-semibold">Rp {{ number_format($p->laba, 0, ',', '.') }}</td>
-                        <td class="p-2 border">{{ $p->tanggal_jual }}</td>
-                        <td class="p-2 border flex gap-2">
-                            <a href="{{ route('penjualan.edit', $p->id) }}" class="text-blue-600">Edit</a>
-                            <form action="{{ route('penjualan.destroy', $p->id) }}" method="POST"
-                                onsubmit="return confirm('Yakin hapus?')">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="text-red-600">Hapus</button>
-                            </form>
+                        <td class="p-2 border">{{ $m->merek }} - {{ $m->tipe_model }}</td>
+                        <td class="p-2 border">{{ $m->plat_nomor }}</td>
+                        <td class="p-2 border">Rp {{ number_format($m->harga_beli, 0, ',', '.') }}</td>
+                        <td class="p-2 border">Rp {{ number_format($totalRestorasi, 0, ',', '.') }}</td>
+                        <td class="p-2 border font-semibold">Rp {{ number_format($totalModal, 0, ',', '.') }}</td>
+                        <td class="p-2 border text-center">
+                            <button onclick="openModal({{ $m->id }}, {{ $m->harga_beli }}, {{ $totalRestorasi }})"
+                                class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition">
+                                Jual
+                            </button>
                         </td>
                     </tr>
+
+                    {{-- MODAL JUAL --}}
+                    <div id="modal-{{ $m->id }}"
+                        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
+                            <h2 class="text-xl font-bold mb-4">Jual Motor</h2>
+
+                            <form action="{{ route('penjualan.store') }}" method="POST">
+                                @csrf
+                                <input type="hidden" name="motor_id" value="{{ $m->id }}">
+
+                                <div class="mb-3 space-y-1">
+                                    <p><strong>Motor:</strong> {{ $m->merek }} - {{ $m->tipe_model }}</p>
+                                    <p><strong>Harga Beli:</strong> Rp {{ number_format($m->harga_beli, 0, ',', '.') }}</p>
+                                    <p><strong>Restorasi:</strong> Rp {{ number_format($totalRestorasi, 0, ',', '.') }}</p>
+                                    <p><strong>Total Modal:</strong> <span class="text-blue-600 font-semibold">Rp
+                                            {{ number_format($totalModal, 0, ',', '.') }}</span></p>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="block font-semibold mb-1">Harga Jual</label>
+                                    <input type="text" name="harga_jual" oninput="formatInput(this); hitungLaba({{ $m->id }})"
+                                        id="harga_jual_{{ $m->id }}" class="w-full border p-2 rounded" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="block font-semibold mb-1">Laba</label>
+                                    <input type="text" id="laba_{{ $m->id }}" readonly
+                                        class="w-full border p-2 rounded bg-gray-100 font-semibold text-green-600">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="block font-semibold mb-1">Tanggal Jual</label>
+                                    <input type="date" name="tanggal_jual" class="w-full border p-2 rounded" required>
+                                </div>
+
+                                <div class="mt-4 flex justify-end gap-2">
+                                    <button type="button" onclick="closeModal({{ $m->id }})"
+                                        class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition">
+                                        Batal
+                                    </button>
+                                    <button type="submit"
+                                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
+                                        Simpan
+                                    </button>
+                                </div>
+                            </form>
+
+                            <button onclick="closeModal({{ $m->id }})"
+                                class="absolute top-2 right-2 text-gray-500 hover:text-black">✕</button>
+                        </div>
+                    </div>
                 @endforeach
             </tbody>
         </table>
     </div>
+
+    <script>
+        // === Modal ===
+        function openModal(id, hargaBeli, restorasi) {
+            const modal = document.getElementById(`modal-${id}`);
+            modal.dataset.hargaBeli = hargaBeli;
+            modal.dataset.restorasi = restorasi;
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(`modal-${id}`).classList.add('hidden');
+        }
+
+        // === Format input harga jual pakai koma ===
+        function formatInput(input) {
+            let value = input.value.replace(/[^\d]/g, '');
+            if (value) {
+                input.value = parseInt(value).toLocaleString('id-ID');
+            } else {
+                input.value = '';
+            }
+        }
+
+        // === Hitung laba realtime ===
+        function hitungLaba(id) {
+            const modal = document.getElementById(`modal-${id}`);
+            const hargaBeli = parseFloat(modal.dataset.hargaBeli);
+            const restorasi = parseFloat(modal.dataset.restorasi);
+
+            const input = document.getElementById(`harga_jual_${id}`);
+            const hargaJual = parseFloat(input.value.replace(/\./g, '')) || 0;
+
+            const laba = hargaJual - (hargaBeli + restorasi);
+            document.getElementById(`laba_${id}`).value = `Rp ${laba.toLocaleString('id-ID')}`;
+        }
+    </script>
+
+    <style>
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.2s ease-out;
+        }
+    </style>
 @endsection

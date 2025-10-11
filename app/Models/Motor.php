@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use App\Models\Restorasi;
+use App\Models\Penjualan;
+
 class Motor extends Model
 {
     use HasFactory;
@@ -31,6 +34,11 @@ class Motor extends Model
     }
 
     public function restorasis()
+    {
+        return $this->hasMany(Restorasi::class, 'motor_id');
+    }
+    // alias: jika ada kode lain yang manggil "restorasi" (tanpa s)
+    public function restorasi()
     {
         return $this->hasMany(Restorasi::class, 'motor_id');
     }

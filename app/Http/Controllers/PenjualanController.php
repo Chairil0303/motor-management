@@ -11,8 +11,10 @@ class PenjualanController extends Controller
 {
     public function index()
     {
-        $penjualan = Penjualan::with(['motor', 'pelanggan'])->latest()->get();
-        return view('penjualan.index', compact('penjualan'));
+        // ambil motor yang belum terjual
+        $motor = \App\Models\Motor::whereDoesntHave('penjualan')->with('restorasis')->get();
+
+        return view('penjualan.index', compact('motor'));
     }
 
     public function create()
