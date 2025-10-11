@@ -9,19 +9,29 @@ use Illuminate\Support\Facades\Validator;
 
 class RestorasiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Ambil semua motor dengan relasi restorasi
-        $motor = \App\Models\Motor::with('restorasis')->get();
+        $query = Motor::with('restorasis');
+
+        // ✅ Search by plat nomor
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where('plat_nomor', 'like', "%{$search}%");
+        }
+
+        // ✅ Pagination 20 data
+        $motor = $query->orderBy('id', 'desc')->paginate(20);
+        $motor->appends($request->only('search'));
+
         return view('restorasi.index', compact('motor'));
     }
 
-    // Tambahin method detail
     public function detail($motorId)
     {
-        $motor = \App\Models\Motor::with('restorasis')->findOrFail($motorId);
+        $motor = Motor::with('restorasis')->findOrFail($motorId);
         return view('restorasi.partials.detail', compact('motor'));
     }
+
     public function create()
     {
         $motor = Motor::where('status', 'tersedia')->get();
@@ -32,7 +42,7 @@ class RestorasiController extends Controller
     {
         $data = $request->all();
 
-        // bersihkan format (1.000.000 -> 1000000)
+        // Hilangkan format (1.000.000 → 1000000)
         if (isset($data['biaya_restorasi'])) {
             $data['biaya_restorasi'] = (float) str_replace(['.', ','], ['', ''], $data['biaya_restorasi']);
         }
@@ -51,7 +61,7 @@ class RestorasiController extends Controller
 
     public function updateInline(Request $request, $id)
     {
-        $r = \App\Models\Restorasi::findOrFail($id);
+        $r = Restorasi::findOrFail($id);
 
         $data = $request->validate([
             'deskripsi' => 'nullable|string',
@@ -59,7 +69,6 @@ class RestorasiController extends Controller
             'biaya_restorasi' => 'required',
         ]);
 
-        // Hilangkan format titik dari biaya
         $data['biaya_restorasi'] = str_replace('.', '', $data['biaya_restorasi']);
 
         $r->update($data);
@@ -69,12 +78,11 @@ class RestorasiController extends Controller
 
     public function deleteInline($id)
     {
-        $r = \App\Models\Restorasi::findOrFail($id);
+        $r = Restorasi::findOrFail($id);
         $r->delete();
 
         return response()->json(['success' => true]);
     }
-
 
     public function edit(Restorasi $restorasi)
     {

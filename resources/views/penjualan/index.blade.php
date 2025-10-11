@@ -4,6 +4,13 @@
     <div class="container mx-auto p-6">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">Data Penjualan</h1>
+
+            <!-- Form Search -->
+            <form method="GET" action="{{ route('penjualan.index') }}" class="flex gap-2">
+                <input autocomplete="off" type="text" name="search" value="{{ request('search') }}"
+                    placeholder="Cari plat nomor..." class="border rounded p-2">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Cari</button>
+            </form>
         </div>
 
         @if(session('success'))
@@ -23,13 +30,13 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($motor as $m)
+                @forelse($motor as $m)
                     @php
-                        $totalRestorasi = $m->restorasi->sum('biaya_restorasi');
+                        $totalRestorasi = $m->restorasis->sum('biaya_restorasi');
                         $totalModal = $m->harga_beli + $totalRestorasi;
                     @endphp
                     <tr>
-                        <td class="p-2 border">{{ $loop->iteration }}</td>
+                        <td class="p-2 border">{{ $loop->iteration + ($motor->currentPage() - 1) * $motor->perPage() }}</td>
                         <td class="p-2 border">{{ $m->merek }} - {{ $m->tipe_model }}</td>
                         <td class="p-2 border">{{ $m->plat_nomor }}</td>
                         <td class="p-2 border">Rp {{ number_format($m->harga_beli, 0, ',', '.') }}</td>
@@ -49,9 +56,10 @@
                         <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
                             <h2 class="text-xl font-bold mb-4">Jual Motor</h2>
 
-                            <form action="{{ route('penjualan.store') }}" method="POST">
+                            <form id="formJual-{{ $m->id }}" method="POST" action="{{ route('penjualan.store') }}">
                                 @csrf
                                 <input type="hidden" name="motor_id" value="{{ $m->id }}">
+                                <input type="hidden" name="status" value="terjual">
 
                                 <div class="mb-3 space-y-1">
                                     <p><strong>Motor:</strong> {{ $m->merek }} - {{ $m->tipe_model }}</p>
@@ -63,7 +71,7 @@
 
                                 <div class="mb-3">
                                     <label class="block font-semibold mb-1">Harga Jual</label>
-                                    <input type="text" name="harga_jual" oninput="formatInput(this); hitungLaba({{ $m->id }})"
+                                    <input autocomplete="off" type="text" name="harga_jual" oninput="formatInput(this); hitungLaba({{ $m->id }})"
                                         id="harga_jual_{{ $m->id }}" class="w-full border p-2 rounded" required>
                                 </div>
 
@@ -83,9 +91,9 @@
                                         class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition">
                                         Batal
                                     </button>
-                                    <button type="submit"
+                                    <button type="button" onclick="confirmJual({{ $m->id }})"
                                         class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-                                        Simpan
+                                        Jual
                                     </button>
                                 </div>
                             </form>
@@ -94,11 +102,20 @@
                                 class="absolute top-2 right-2 text-gray-500 hover:text-black">✕</button>
                         </div>
                     </div>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="7" class="text-center p-4 text-gray-500">Tidak ada data motor tersedia.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
+
+        <div class="mt-4">
+            {{ $motor->links() }}
+        </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // === Modal ===
         function openModal(id, hargaBeli, restorasi) {
@@ -127,12 +144,28 @@
             const modal = document.getElementById(`modal-${id}`);
             const hargaBeli = parseFloat(modal.dataset.hargaBeli);
             const restorasi = parseFloat(modal.dataset.restorasi);
-
             const input = document.getElementById(`harga_jual_${id}`);
             const hargaJual = parseFloat(input.value.replace(/\./g, '')) || 0;
-
             const laba = hargaJual - (hargaBeli + restorasi);
             document.getElementById(`laba_${id}`).value = `Rp ${laba.toLocaleString('id-ID')}`;
+        }
+
+        // === Konfirmasi jual pakai SweetAlert ===
+        function confirmJual(id) {
+            Swal.fire({
+                title: 'Yakin jual motor ini?',
+                text: 'Status motor akan berubah menjadi TERJUAL!',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Ya, Jual Sekarang',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`formJual-${id}`).submit();
+                }
+            });
         }
     </script>
 

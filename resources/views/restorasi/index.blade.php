@@ -4,6 +4,13 @@
     <div class="container mx-auto p-6">
         <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">Data Restorasi</h1>
+
+            <!-- Form Search -->
+            <form method="GET" action="{{ route('restorasi.index') }}" class="flex gap-2">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari plat nomor..."
+                    class="border rounded p-2">
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded">Cari</button>
+            </form>
         </div>
 
         @if(session('success'))
@@ -22,12 +29,12 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($motor as $m)
+                @forelse($motor as $m)
                     @php
                         $totalRestorasi = $m->restorasis->sum('biaya_restorasi');
                     @endphp
                     <tr>
-                        <td class="p-2 border">{{ $loop->iteration }}</td>
+                        <td class="p-2 border">{{ $loop->iteration + ($motor->currentPage() - 1) * $motor->perPage() }}</td>
                         <td class="p-2 border">{{ $m->merek }}</td>
                         <td class="p-2 border">{{ $m->tipe_model }}</td>
                         <td class="p-2 border">{{ $m->plat_nomor ?? '-' }}</td>
@@ -41,9 +48,18 @@
                             </button>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr>
+                        <td colspan="6" class="text-center p-4 text-gray-500">Data tidak ditemukan.</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
+
+        <!-- Pagination -->
+        <div class="mt-4">
+            {{ $motor->links() }}
+        </div>
     </div>
 
     <!-- Modal Detail -->
@@ -128,7 +144,6 @@
             input.value = value;
         }
 
-        // DETAIL MODAL
         function openDetailModal(motorId) {
             currentMotorId = motorId;
             const modal = document.getElementById('detailModal');
@@ -143,7 +158,7 @@
             fetch("{{ url('restorasi/detail') }}/" + motorId)
                 .then(res => res.text())
                 .then(html => content.innerHTML = html)
-                .catch(err => content.innerHTML = '<div class="text-center p-4 text-red-600">Gagal memuat data</div>');
+                .catch(() => content.innerHTML = '<div class="text-center p-4 text-red-600">Gagal memuat data</div>');
         }
 
         function closeDetailModal() {
@@ -152,7 +167,6 @@
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // CREATE MODAL
         function openCreateModal(motorId) {
             document.getElementById('motor_id').value = motorId;
             const modal = document.getElementById('createModal');
@@ -162,15 +176,12 @@
                 modal.classList.add('opacity-100');
             }, 10);
         }
+
         function closeCreateModal() {
             const modal = document.getElementById('createModal');
             modal.classList.add('opacity-0');
             setTimeout(() => modal.classList.add('hidden'), 300);
         }
-
-        // EDIT MODAL
-        const editModal = document.getElementById('editModal');
-        const editModalContent = editModal.querySelector('div');
 
         function openEditModal(id, deskripsi, tanggal, biaya) {
             const form = document.getElementById('editForm');
@@ -179,15 +190,13 @@
             document.getElementById('edit_tanggal').value = tanggal;
             document.getElementById('edit_biaya').value = new Intl.NumberFormat('id-ID').format(biaya);
 
+            const editModal = document.getElementById('editModal');
             editModal.classList.remove('hidden');
             setTimeout(() => {
                 editModal.classList.remove('opacity-0');
                 editModal.classList.add('opacity-100');
-                editModalContent.classList.remove('scale-95');
-                editModalContent.classList.add('scale-100');
             }, 10);
 
-            // handle submit edit form
             form.onsubmit = function (e) {
                 e.preventDefault();
                 const formData = new FormData(form);
@@ -198,19 +207,18 @@
                 }).then(res => {
                     if (res.ok) {
                         closeEditModal();
-                        openDetailModal(currentMotorId); // reload detail
+                        openDetailModal(currentMotorId);
                     }
                 });
             };
         }
 
         function closeEditModal() {
-            editModal.classList.add('opacity-0');
-            editModalContent.classList.add('scale-95');
-            setTimeout(() => editModal.classList.add('hidden'), 300);
+            const modal = document.getElementById('editModal');
+            modal.classList.add('opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
         }
 
-        // DELETE
         function confirmDelete(id) {
             Swal.fire({
                 title: 'Anda yakin?',
@@ -229,7 +237,7 @@
                     }).then(res => {
                         if (res.ok) {
                             Swal.fire('Terhapus!', 'Data restorasi telah dihapus.', 'success').then(() => {
-                                openDetailModal(currentMotorId); // reload modal detail, bukan reload page
+                                openDetailModal(currentMotorId);
                             });
                         } else {
                             Swal.fire('Gagal', 'Tidak dapat menghapus data.', 'error');
