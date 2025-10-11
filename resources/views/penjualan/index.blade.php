@@ -3,9 +3,8 @@
 @section('content')
     <div class="container mx-auto p-6">
         <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold">Data Penjualan</h1>
+            <h1 class="text-2xl font-bold">Jual Motor</h1>
 
-            <!-- Form Search -->
             <form method="GET" action="{{ route('penjualan.index') }}" class="flex gap-2">
                 <input autocomplete="off" type="text" name="search" value="{{ request('search') }}"
                     placeholder="Cari plat nomor..." class="border rounded p-2">
@@ -52,54 +51,93 @@
 
                     {{-- MODAL JUAL --}}
                     <div id="modal-{{ $m->id }}"
-                        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative animate-fadeIn">
-                            <h2 class="text-xl font-bold mb-4">Jual Motor</h2>
+                        class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-auto">
+                        <div
+                            class="bg-white rounded-lg shadow-lg w-full max-w-4xl p-6 relative animate-fadeIn overflow-y-auto max-h-[90vh]">
+                            <h2 class="text-2xl font-bold mb-4 text-center">Form Penjualan Motor</h2>
 
                             <form id="formJual-{{ $m->id }}" method="POST" action="{{ route('penjualan.store') }}">
                                 @csrf
                                 <input type="hidden" name="motor_id" value="{{ $m->id }}">
                                 <input type="hidden" name="status" value="terjual">
 
-                                <div class="mb-3 space-y-1">
-                                    <p><strong>Motor:</strong> {{ $m->merek }} - {{ $m->tipe_model }}</p>
-                                    <p><strong>Harga Beli:</strong> Rp {{ number_format($m->harga_beli, 0, ',', '.') }}</p>
-                                    <p><strong>Restorasi:</strong> Rp {{ number_format($totalRestorasi, 0, ',', '.') }}</p>
-                                    <p><strong>Total Modal:</strong> <span class="text-blue-600 font-semibold">Rp
-                                            {{ number_format($totalModal, 0, ',', '.') }}</span></p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {{-- Kiri: Detail Motor --}}
+                                    <div class="space-y-2">
+                                        <h3 class="text-lg font-semibold mb-2 border-b pb-1">Detail Motor</h3>
+                                        <p><strong>Merek:</strong> {{ $m->merek }}</p>
+                                        <p><strong>Tipe:</strong> {{ $m->tipe_model }}</p>
+                                        <p><strong>Plat Nomor:</strong> {{ $m->plat_nomor }}</p>
+                                        <p><strong>Tahun:</strong> {{ $m->tahun }}</p>
+                                        <p><strong>Harga Beli:</strong> Rp {{ number_format($m->harga_beli, 0, ',', '.') }}</p>
+                                        <p><strong>Total Restorasi:</strong> Rp
+                                            {{ number_format($totalRestorasi, 0, ',', '.') }}
+                                        </p>
+                                        <p><strong>Total Modal:</strong> <span class=" text-blue-600 font-semibold">Rp
+                                                {{ number_format($totalModal, 0, ',', '.') }}</span></p>
+                                        <hr class="my-3 border-gray-300">
+
+                                        <div class="mb-3">
+                                            <label class="block font-semibold mb-1">Harga Jual</label>
+                                            <input autocomplete="off" type="text" name="harga_jual"
+                                                placeholder="Masukkan Harga Jual"
+                                                oninput="formatInput(this); hitungLaba({{ $m->id }})"
+                                                id="harga_jual_{{ $m->id }}" class="w-full border p-2 rounded" required>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label class="block font-semibold mb-1">Laba</label>
+                                            <input type="text" id="laba_{{ $m->id }}" readonly
+                                                class="w-full border p-2 rounded bg-gray-100 font-semibold text-green-600">
+                                        </div>
+
+                                    </div>
+
+                                    {{-- Kanan: Form Penjualan --}}
+                                    <div>
+                                        <h3 class="text-lg font-semibold mb-2 border-b pb-1">Data Penjualan</h3>
+
+
+
+                                        <div class="mb-6 mt-4">
+                                            <label class="block font-semibold mb-1">Nama Pembeli</label>
+                                            <input autocomplete="off" type="text" name="nama_pembeli"
+                                                class="w-full border p-2 rounded" required>
+                                        </div>
+
+                                        <div class="mb-5">
+                                            <label class="block font-semibold mb-1">No. Telepon Pembeli</label>
+                                            <input autocomplete="off" type="text" name="no_telp_pembeli"
+                                                class="w-full border p-2 rounded" required>
+                                        </div>
+
+                                        <div class="mb-5">
+                                            <label class="block font-semibold mb-1">Alamat Pembeli</label>
+                                            <textarea name="alamat_pembeli" rows="2" class="w-full border p-2 rounded"
+                                                required></textarea>
+                                        </div>
+
+                                        <div class="mb-5">
+                                            <label class="block font-semibold mb-1">Tanggal Jual</label>
+                                            <input type="date" name="tanggal_jual" class="w-full border p-2 rounded" required>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="mb-3">
-                                    <label class="block font-semibold mb-1">Harga Jual</label>
-                                    <input autocomplete="off" type="text" name="harga_jual" oninput="formatInput(this); hitungLaba({{ $m->id }})"
-                                        id="harga_jual_{{ $m->id }}" class="w-full border p-2 rounded" required>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="block font-semibold mb-1">Laba</label>
-                                    <input type="text" id="laba_{{ $m->id }}" readonly
-                                        class="w-full border p-2 rounded bg-gray-100 font-semibold text-green-600">
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="block font-semibold mb-1">Tanggal Jual</label>
-                                    <input type="date" name="tanggal_jual" class="w-full border p-2 rounded" required>
-                                </div>
-
-                                <div class="mt-4 flex justify-end gap-2">
+                                <div class="mt-6 flex justify-end gap-2 border-t pt-3">
                                     <button type="button" onclick="closeModal({{ $m->id }})"
                                         class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 transition">
                                         Batal
                                     </button>
                                     <button type="button" onclick="confirmJual({{ $m->id }})"
                                         class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">
-                                        Jual
+                                        Jual Sekarang
                                     </button>
                                 </div>
                             </form>
 
                             <button onclick="closeModal({{ $m->id }})"
-                                class="absolute top-2 right-2 text-gray-500 hover:text-black">✕</button>
+                                class="absolute top-3 right-4 text-gray-500 hover:text-black text-2xl">✕</button>
                         </div>
                     </div>
                 @empty
@@ -117,29 +155,25 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
-        // === Modal ===
         function openModal(id, hargaBeli, restorasi) {
             const modal = document.getElementById(`modal-${id}`);
             modal.dataset.hargaBeli = hargaBeli;
             modal.dataset.restorasi = restorasi;
             modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // biar body ga scroll
         }
 
         function closeModal(id) {
-            document.getElementById(`modal-${id}`).classList.add('hidden');
+            const modal = document.getElementById(`modal-${id}`);
+            modal.classList.add('hidden');
+            document.body.style.overflow = ''; // balikin scroll
         }
 
-        // === Format input harga jual pakai koma ===
         function formatInput(input) {
             let value = input.value.replace(/[^\d]/g, '');
-            if (value) {
-                input.value = parseInt(value).toLocaleString('id-ID');
-            } else {
-                input.value = '';
-            }
+            input.value = value ? parseInt(value).toLocaleString('id-ID') : '';
         }
 
-        // === Hitung laba realtime ===
         function hitungLaba(id) {
             const modal = document.getElementById(`modal-${id}`);
             const hargaBeli = parseFloat(modal.dataset.hargaBeli);
@@ -150,7 +184,6 @@
             document.getElementById(`laba_${id}`).value = `Rp ${laba.toLocaleString('id-ID')}`;
         }
 
-        // === Konfirmasi jual pakai SweetAlert ===
         function confirmJual(id) {
             Swal.fire({
                 title: 'Yakin jual motor ini?',

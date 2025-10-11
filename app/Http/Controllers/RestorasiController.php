@@ -11,7 +11,7 @@ class RestorasiController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Motor::with('restorasis');
+        $query = Motor::where('status', 'tersedia')->with('restorasis');
 
         // ✅ Search by plat nomor
         if ($request->filled('search')) {

@@ -18,7 +18,7 @@
                 <a href="{{ route('restorasi.index') }}" class="block px-4 py-2 hover:bg-gray-200">🛠️ Restorasi</a>
             </li>
             <li>
-                <a href="{{ route('penjualan.index') }}" class="block px-4 py-2 hover:bg-gray-200">💰 Penjualan</a>
+                <a href="{{ route('penjualan.index') }}" class="block px-4 py-2 hover:bg-gray-200">💰 Jual Motor</a>
             </li>
         </ul>
     </nav>

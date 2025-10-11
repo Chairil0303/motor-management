@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Penjualan;
 use App\Models\Motor;
-use App\Models\Pelanggan;
 use Illuminate\Http\Request;
 
 class PenjualanController extends Controller
@@ -22,77 +21,37 @@ class PenjualanController extends Controller
         return view('penjualan.index', compact('motor'));
     }
 
-    public function create()
-    {
-        $motor = Motor::all();
-        $pelanggan = Pelanggan::all();
-        return view('penjualan.create', compact('motor', 'pelanggan'));
-    }
-
     public function store(Request $request)
     {
         $request->validate([
             'motor_id' => 'required|exists:motor,id',
             'harga_jual' => 'required',
             'tanggal_jual' => 'required|date',
+            'nama_pembeli' => 'required|string|max:255',
+            'no_telp_pembeli' => 'required|string|max:20',
+            'alamat_pembeli' => 'required|string',
         ]);
 
         $motor = Motor::findOrFail($request->motor_id);
 
-        // ✅ Hapus semua titik supaya numeric valid
         $hargaJual = floatval(str_replace('.', '', $request->harga_jual));
-
-        // Hitung total biaya
         $totalBiaya = $motor->harga_beli + $motor->restorasis->sum('biaya_restorasi');
         $laba = $hargaJual - $totalBiaya;
 
-        // Simpan ke tabel penjualan
         Penjualan::create([
             'motor_id' => $motor->id,
             'harga_jual' => $hargaJual,
             'total_biaya' => $totalBiaya,
             'laba' => $laba,
             'tanggal_jual' => $request->tanggal_jual,
+            'nama_pembeli' => $request->nama_pembeli,
+            'no_telp_pembeli' => $request->no_telp_pembeli,
+            'alamat_pembeli' => $request->alamat_pembeli,
         ]);
 
-        // ✅ Update status motor jadi terjual
         $motor->update(['status' => 'terjual']);
 
         return redirect()->route('penjualan.index')->with('success', 'Motor berhasil dijual dan status diperbarui!');
-    }
-
-
-    public function edit(Penjualan $penjualan)
-    {
-        $motor = Motor::all();
-        $pelanggan = Pelanggan::all();
-        return view('penjualan.edit', compact('penjualan', 'motor', 'pelanggan'));
-    }
-
-    public function update(Request $request, Penjualan $penjualan)
-    {
-        $request->validate([
-            'motor_id' => 'required',
-            'pelanggan_id' => 'required',
-            'harga_jual' => 'required|numeric',
-            'tanggal_jual' => 'required|date',
-        ]);
-
-        $motor = Motor::findOrFail($request->motor_id);
-
-        $totalBiaya = $motor->harga_beli + $motor->restorasi->sum('biaya_restorasi');
-        $laba = $request->harga_jual - $totalBiaya;
-
-        $penjualan->update([
-            'motor_id' => $request->motor_id,
-            'pelanggan_id' => $request->pelanggan_id,
-            'harga_jual' => $request->harga_jual,
-            'total_biaya' => $totalBiaya,
-            'laba' => $laba,
-            'tanggal_jual' => $request->tanggal_jual,
-        ]);
-
-        return redirect()->route('penjualan.index')->with('success', 'Data penjualan berhasil diperbarui');
     }
 
     public function destroy(Penjualan $penjualan)
