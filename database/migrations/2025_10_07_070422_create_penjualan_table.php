@@ -9,13 +9,20 @@ return new class extends Migration {
     {
         Schema::create('penjualan', function (Blueprint $table) {
             $table->id();
+
+            // 🔢 Kode penjualan otomatis, contoh: KEN2501
+            $table->string('kode_penjualan')->unique()->nullable();
+
+            // 🔗 Relasi ke motor
             $table->foreignId('motor_id')->constrained('motor')->onDelete('cascade');
+
+            // 📅 Data penjualan
             $table->date('tanggal_jual');
             $table->decimal('harga_jual', 15, 2);
             $table->decimal('total_biaya', 15, 2)->default(0);
             $table->decimal('laba', 15, 2)->default(0);
 
-            // 🔥 Tambahan kolom pembeli
+            // 👤 Data pembeli
             $table->string('nama_pembeli')->nullable();
             $table->string('no_telp_pembeli')->nullable();
             $table->text('alamat_pembeli')->nullable();

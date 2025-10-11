@@ -21,6 +21,7 @@ class Penjualan extends Model
         'nama_pembeli',
         'no_telp_pembeli',
         'alamat_pembeli',
+        'kode_penjualan',
     ];
 
     public function motor()

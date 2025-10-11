@@ -2,12 +2,32 @@
 
 @section('content')
     <div class="container mx-auto p-6">
-        <h1 class="text-2xl font-bold mb-4">📊 Laporan Penjualan Motor</h1>
+        <h1 class="text-2xl font-bold mb-6">📊 Laporan Penjualan Motor</h1>
+
+        {{-- 🔍 Filter dan Search --}}
+        <form method="GET" action="{{ route('laporan.penjualan') }}" class="flex flex-col md:flex-row gap-3 mb-5">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari kode penjualan..."
+                class="border rounded px-3 py-2 w-full md:w-1/3" autocomplete="off">
+
+            <input type="month" name="bulan" value="{{ request('bulan') }}"
+                class="border rounded px-3 py-2 w-full md:w-1/4">
+
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                Filter
+            </button>
+
+            @if(request('search') || request('bulan'))
+                <a href="{{ route('laporan.penjualan') }}" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400 text-center">
+                    Reset
+                </a>
+            @endif
+        </form>
 
         <table class="w-full border text-left">
             <thead class="bg-gray-100">
                 <tr>
                     <th class="p-2 border">#</th>
+                    <th class="p-2 border">Kode</th>
                     <th class="p-2 border">Tanggal Jual</th>
                     <th class="p-2 border">Motor</th>
                     <th class="p-2 border">Laba</th>
@@ -19,13 +39,10 @@
                     <tr>
                         <td class="p-2 border">{{ $loop->iteration + ($penjualan->currentPage() - 1) * $penjualan->perPage() }}
                         </td>
+                        <td class="p-2 border font-semibold">{{ $p->kode_penjualan }}</td>
                         <td class="p-2 border">{{ \Carbon\Carbon::parse($p->tanggal_jual)->format('d M Y') }}</td>
-                        <td class="p-2 border">
-                            {{ $p->motor->merek ?? '-' }} - {{ $p->motor->tipe_model ?? '-' }}
-                        </td>
-                        <td class="p-2 border text-green-600 font-semibold">
-                            Rp {{ number_format($p->laba, 0, ',', '.') }}
-                        </td>
+                        <td class="p-2 border">{{ $p->motor->merek ?? '-' }} - {{ $p->motor->tipe_model ?? '-' }}</td>
+                        <td class="p-2 border text-green-600 font-semibold">Rp {{ number_format($p->laba, 0, ',', '.') }}</td>
                         <td class="p-2 border text-center">
                             <button onclick="openModal({{ $p->id }})"
                                 class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
@@ -45,6 +62,7 @@
                                 {{-- Info Motor --}}
                                 <div>
                                     <h3 class="text-lg font-semibold mb-2 border-b pb-1">Motor</h3>
+                                    <p><strong>Kode Penjualan:</strong> {{ $p->kode_penjualan }}</p>
                                     <p><strong>Merek:</strong> {{ $p->motor->merek ?? '-' }}</p>
                                     <p><strong>Tipe:</strong> {{ $p->motor->tipe_model ?? '-' }}</p>
                                     <p><strong>Plat Nomor:</strong> {{ $p->motor->plat_nomor ?? '-' }}</p>
@@ -81,7 +99,7 @@
                     </div>
                 @empty
                     <tr>
-                        <td colspan="5" class="text-center p-4 text-gray-500">Belum ada penjualan.</td>
+                        <td colspan="6" class="text-center p-4 text-gray-500">Tidak ada data penjualan.</td>
                     </tr>
                 @endforelse
             </tbody>
