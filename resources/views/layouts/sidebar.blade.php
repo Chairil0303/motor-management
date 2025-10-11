@@ -20,6 +20,10 @@
             <li>
                 <a href="{{ route('penjualan.index') }}" class="block px-4 py-2 hover:bg-gray-200">💰 Jual Motor</a>
             </li>
+            <li>
+                <a href="{{ route('laporan.penjualan') }}" class="block px-4 py-2 hover:bg-gray-200">📊 Laporan
+                    Penjualan</a>
+            </li>
         </ul>
     </nav>
 </aside>

@@ -18,6 +18,9 @@ class Penjualan extends Model
         'harga_jual',
         'total_biaya',
         'laba',
+        'nama_pembeli',
+        'no_telp_pembeli',
+        'alamat_pembeli',
     ];
 
     public function motor()

@@ -8,6 +8,7 @@ use App\Http\Controllers\PembelianController;
 use App\Http\Controllers\RestorasiController;
 use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\LaporanPenjualanController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -33,6 +34,7 @@ Route::resource('pelanggan', PelangganController::class)->middleware(['auth']);
 Route::resource('pembelian', PembelianController::class)->middleware(['auth']);
 Route::resource('restorasi', RestorasiController::class)->middleware(['auth']);
 Route::resource('penjualan', PenjualanController::class)->middleware(['auth']);
+Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])->name('laporan.penjualan');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
