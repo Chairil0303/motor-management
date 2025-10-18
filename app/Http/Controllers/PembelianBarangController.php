@@ -67,12 +67,12 @@ class PembelianBarangController extends Controller
             }
         });
 
-        return redirect()->route('pembelian.index')->with('success', 'Pembelian barang berhasil ditambahkan!');
+        return redirect()->route('bengkel.pembelian.index')->with('success', 'Pembelian barang berhasil ditambahkan!');
     }
 
     public function destroy(PembelianBarang $pembelian)
     {
         $pembelian->delete();
-        return redirect()->route('pembelian.index')->with('success', 'Data pembelian berhasil dihapus!');
+        return redirect()->route('bengkel.pembelian.index')->with('success', 'Data pembelian berhasil dihapus!');
     }
 }

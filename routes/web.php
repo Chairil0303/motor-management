@@ -14,6 +14,7 @@ use App\Http\Controllers\LaporanPenjualanController;
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PembelianBarangController;
 use App\Http\Controllers\PenjualanBarangController;
+use App\Http\Controllers\KategoriController;
 
 
 Route::get('/', function () {
@@ -50,6 +51,10 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
     // Penjualan Barang Bengkel
     Route::resource('penjualan', PenjualanBarangController::class)
         ->names('bengkel.penjualan');
+
+    Route::resource('kategori', KategoriController::class)->except(['show'])
+        ->names('bengkel.kategori');
+
 });
 
 

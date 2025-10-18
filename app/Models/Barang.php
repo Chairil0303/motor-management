@@ -12,7 +12,7 @@ class Barang extends Model
     protected $fillable = [
         'kode_barang',
         'nama_barang',
-        'kategori',
+        'kategori_id',
         'stok',
         'harga_beli',
         'harga_jual',
@@ -29,4 +29,9 @@ class Barang extends Model
     {
         return $this->hasMany(PenjualanDetail::class);
     }
+    public function kategori()
+    {
+        return $this->belongsTo(Kategori::class);
+    }
+
 }
