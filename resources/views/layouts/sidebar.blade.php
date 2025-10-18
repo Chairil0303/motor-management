@@ -72,6 +72,9 @@
             <!-- Motor Section -->
             <li class="mt-4 px-4 text-gray-500 uppercase text-xs font-semibold">Motor</li>
             <li>
+                <a href="{{ route('pembelian.index') }}" class="block px-4 py-2 hover:bg-gray-200">🧾 Beli Motor</a>
+            </li>
+            <li>
                 <a href="{{ route('motor.index') }}" class="block px-4 py-2 hover:bg-gray-200">🛵 Motor</a>
             </li>
             <li>

@@ -33,13 +33,13 @@
                         <td class="p-2 border">{{ $k->nama_kategori }}</td>
                         <td class="p-2 border text-center">
                             <a href="{{ route('bengkel.kategori.edit', $k->id) }}"
-                                class="bg-yellow-500 text-white px-2 py-1 text-xs rounded hover:bg-yellow-600">
+                                class="bg-yellow-500 text-black px-2 py-1 text-xs rounded hover:bg-yellow-600">
                                 Edit
                             </a>
                             <form action="{{ route('bengkel.kategori.destroy', $k->id) }}" method="POST" class="inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" onclick="return confirm('Yakin hapus kategori ini?')"
-                                    class="bg-red-500 text-white px-2 py-1 text-xs rounded hover:bg-red-600">
+                                    class="bg-red-500 text-black px-2 py-1 text-xs rounded hover:bg-red-600">
                                     Hapus
                                 </button>
                             </form>

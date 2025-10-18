@@ -12,9 +12,11 @@
         </div>
 
         {{-- Filter Bulan --}}
-        <form method="GET" action="{{ route('bengkel.belanja.index') }}" class="mb-4 flex items-center gap-3">
+        {{-- Filter Bulan --}}
+        <form id="filter-bulan-form" method="GET" action="{{ route('bengkel.belanja.index') }}"
+            class="mb-4 flex items-center gap-3">
             <label class="font-semibold">Filter Bulan:</label>
-            <input type="month" name="bulan" value="{{ request('bulan') }}"
+            <input id="filter-bulan-input" type="month" name="bulan" value="{{ request('bulan') }}"
                 class="border p-2 rounded focus:ring focus:ring-blue-300">
             @if(request('bulan'))
                 <a href="{{ route('bengkel.belanja.index') }}" class="text-sm text-blue-600 hover:underline">Reset</a>
@@ -60,7 +62,14 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center p-4 text-gray-500">Belum ada data belanja.</td>
+                        <td colspan="6" class="text-center p-4 text-gray-500">
+                            @if(request('bulan'))
+                                Tidak ada data belanja untuk bulan
+                                {{ \Carbon\Carbon::parse(request('bulan') . '-01')->translatedFormat('F Y') }}.
+                            @else
+                                Belum ada data belanja.
+                            @endif
+                        </td>
                     </tr>
                 @endforelse
             </tbody>
@@ -70,4 +79,19 @@
             {{ $belanjas->links('pagination::tailwind') }}
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const bulanInput = document.getElementById('filter-bulan-input');
+            const form = document.getElementById('filter-bulan-form');
+
+            if (bulanInput) {
+                // Auto submit saat user pilih bulan
+                bulanInput.addEventListener('change', function () {
+                    form.submit();
+                });
+            }
+        });
+    </script>
+
 @endsection

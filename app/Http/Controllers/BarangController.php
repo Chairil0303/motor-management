@@ -35,30 +35,42 @@ class BarangController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'nama_barang' => 'required|string|max:255',
-            'kategori_id' => 'required|exists:kategoris,id',
+            'kategori_id' => 'nullable|exists:kategoris,id',
             'stok' => 'required|integer|min:0',
             'harga_beli' => 'required|numeric|min:0',
             'harga_jual' => 'required|numeric|min:0',
         ]);
 
+        // generate kode
         $latest = Barang::latest('id')->first();
         $increment = $latest ? str_pad($latest->id + 1, 4, '0', STR_PAD_LEFT) : '0001';
         $kode = 'BRG' . date('y') . $increment;
 
-        Barang::create([
+        // simpan (pastikan kolom kategori_id ada di migration/barangs)
+        $barang = Barang::create([
             'kode_barang' => $kode,
-            'nama_barang' => $request->nama_barang,
-            'kategori_id' => $request->kategori_id,
-            'stok' => $request->stok,
-            'harga_beli' => $request->harga_beli,
-            'harga_jual' => $request->harga_jual,
+            'nama_barang' => $validated['nama_barang'],
+            'kategori_id' => $validated['kategori_id'] ?? null,
+            'stok' => $validated['stok'],
+            'harga_beli' => $validated['harga_beli'],
+            'harga_jual' => $validated['harga_jual'],
         ]);
 
-        return redirect()->route('bengkel.barang.index')
-            ->with('success', 'Barang berhasil ditambahkan!');
+        // Jika AJAX / expects JSON -> kembalikan JSON
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Barang berhasil dibuat',
+                'data' => $barang,
+            ], 201);
+        }
+
+        return redirect()->route('bengkel.barang.index')->with('success', 'Barang berhasil ditambahkan!');
     }
+
+
 
     public function edit(Barang $barang)
     {
