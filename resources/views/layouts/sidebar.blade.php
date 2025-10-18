@@ -14,6 +14,11 @@
                     Bengkel</a>
             </li>
             <li>
+                <a href="{{ route('bengkel.belanja.index') }}" class="block px-4 py-2 hover:bg-gray-200">
+                    🧾 Belanja Barang
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('bengkel.pembelian.index') }}" class="block px-4 py-2 hover:bg-gray-200">🧾 Pembelian
                     Barang</a>
             </li>
