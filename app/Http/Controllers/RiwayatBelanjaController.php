@@ -6,28 +6,39 @@ use App\Models\RiwayatBelanja;
 use App\Models\Barang;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\Kategori;
 
 class RiwayatBelanjaController extends Controller
 {
     public function index(Request $request)
     {
-        $query = RiwayatBelanja::with('barang')->orderBy('tanggal_belanja', 'desc');
+        $riwayatQuery = \App\Models\RiwayatBelanja::with('barang');
 
+        // Filter bulan (format: YYYY-MM dari <input type="month">)
         if ($request->filled('bulan')) {
-            $query->whereMonth('tanggal_belanja', Carbon::parse($request->bulan)->month)
-                ->whereYear('tanggal_belanja', Carbon::parse($request->bulan)->year);
+            try {
+                [$tahun, $bulan] = explode('-', $request->bulan);
+                $riwayatQuery->whereYear('tanggal_belanja', $tahun)
+                    ->whereMonth('tanggal_belanja', $bulan);
+            } catch (\Exception $e) {
+                // Lewatin kalau format bulan salah
+            }
         }
 
-        $belanjas = $query->paginate(20);
+        // Hitung total belanja dari query yang sama (clone supaya paginate tidak terpengaruh)
+        $totalBelanja = (clone $riwayatQuery)->sum('total_belanja') ?: 0;
 
-        $totalBelanja = $query->sum('total_belanja');
+        // Ambil data dengan paginate. withQueryString() biar filter bulan tetap ada saat pindah halaman
+        $belanjas = $riwayatQuery->orderBy('tanggal_belanja', 'desc')->paginate(10)->withQueryString();
 
         return view('bengkel.belanja.index', compact('belanjas', 'totalBelanja'));
     }
 
+
     public function create()
     {
-        return view('bengkel.belanja.create');
+        $kategori = Kategori::orderBy('nama_kategori')->get();
+        return view('bengkel.belanja.create', compact('kategori'));
     }
 
     public function store(Request $request)
