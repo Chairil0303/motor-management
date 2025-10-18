@@ -35,16 +35,21 @@ class RiwayatBelanjaController extends Controller
         $request->validate([
             'barang_id' => 'required|exists:barangs,id',
             'kuantiti' => 'required|integer|min:1',
-            'harga_beli' => 'required|numeric|min:0',
+            'harga_beli' => 'required',
+            'harga_jual' => 'nullable',
         ]);
+
+        // 🔧 Hilangkan semua titik (.) sebelum convert ke angka
+        $hargaBeli = str_replace('.', '', $request->harga_beli);
+        $hargaJual = str_replace('.', '', $request->harga_jual ?? 0);
 
         $barang = Barang::find($request->barang_id);
 
         // Update stok dan harga barang
         $barang->update([
             'stok' => $barang->stok + $request->kuantiti,
-            'harga_beli' => $request->harga_beli,
-            'harga_jual' => $request->harga_jual ?? $barang->harga_jual,
+            'harga_beli' => $hargaBeli,
+            'harga_jual' => $hargaJual ?: $barang->harga_jual,
         ]);
 
         // Generate kode belanja otomatis
@@ -58,11 +63,12 @@ class RiwayatBelanjaController extends Controller
             'barang_id' => $barang->id,
             'tanggal_belanja' => now(),
             'kuantiti' => $request->kuantiti,
-            'harga_beli' => $request->harga_beli,
-            'total_belanja' => $request->kuantiti * $request->harga_beli,
+            'harga_beli' => $hargaBeli,
+            'total_belanja' => $request->kuantiti * $hargaBeli,
         ]);
 
         return redirect()->route('bengkel.belanja.index')
             ->with('success', 'Belanja barang berhasil disimpan!');
     }
+
 }

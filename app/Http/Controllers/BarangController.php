@@ -29,7 +29,7 @@ class BarangController extends Controller
 
     public function create()
     {
-        $kategoris = \App\Models\Kategori::orderBy('nama_kategori')->get();
+        $kategoris = Kategori::orderBy('nama_kategori')->get();
         return view('bengkel.barang.create', compact('kategoris'));
     }
 
@@ -62,7 +62,7 @@ class BarangController extends Controller
 
     public function edit(Barang $barang)
     {
-        $kategoris = \App\Models\Kategori::orderBy('nama_kategori')->get();
+        $kategoris = Kategori::orderBy('nama_kategori')->get();
         return view('bengkel.barang.edit', compact('barang', 'kategoris'));
     }
 
