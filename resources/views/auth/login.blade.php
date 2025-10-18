@@ -17,7 +17,7 @@
 
                 <!-- Email Address -->
                 <div>
-                    <x-input-label for="email" :value="__('Email')" class=" font-medium" />
+                    <x-input-label for="email" :value="__('Email')" class="text-gray-700 font-medium" />
                     <x-text-input id="email"
                         class="block mt-1 w-full border-gray-300 focus:border-blue-500 focus:ring focus:ring-blue-200 rounded-lg"
                         type="email" name="email" :value="old('email')" required autofocus autocomplete="username" />
