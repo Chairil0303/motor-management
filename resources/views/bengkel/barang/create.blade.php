@@ -11,6 +11,15 @@
                 <input type="text" name="nama_barang" class="w-full border p-2 rounded" required>
             </div>
             <div>
+                <label class="block font-semibold mb-1">Kategori</label>
+                <select name="kategori_id" class="w-full border p-2 rounded">
+                    <option value="">-- Pilih Kategori --</option>
+                    @foreach($kategoris as $k)
+                        <option value="{{ $k->id }}">{{ $k->nama_kategori }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
                 <label class="block font-semibold mb-1">Stok</label>
                 <input type="number" name="stok" class="w-full border p-2 rounded" required>
             </div>
