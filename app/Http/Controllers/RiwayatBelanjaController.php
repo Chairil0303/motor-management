@@ -3,63 +3,66 @@
 namespace App\Http\Controllers;
 
 use App\Models\RiwayatBelanja;
+use App\Models\Barang;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class RiwayatBelanjaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $query = RiwayatBelanja::with('barang')->orderBy('tanggal_belanja', 'desc');
+
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_belanja', Carbon::parse($request->bulan)->month)
+                ->whereYear('tanggal_belanja', Carbon::parse($request->bulan)->year);
+        }
+
+        $belanjas = $query->paginate(20);
+
+        $totalBelanja = $query->sum('total_belanja');
+
+        return view('bengkel.belanja.index', compact('belanjas', 'totalBelanja'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('bengkel.belanja.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'barang_id' => 'required|exists:barangs,id',
+            'kuantiti' => 'required|integer|min:1',
+            'harga_beli' => 'required|numeric|min:0',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(RiwayatBelanja $riwayatBelanja)
-    {
-        //
-    }
+        $barang = Barang::find($request->barang_id);
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(RiwayatBelanja $riwayatBelanja)
-    {
-        //
-    }
+        // Update stok dan harga barang
+        $barang->update([
+            'stok' => $barang->stok + $request->kuantiti,
+            'harga_beli' => $request->harga_beli,
+            'harga_jual' => $request->harga_jual ?? $barang->harga_jual,
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, RiwayatBelanja $riwayatBelanja)
-    {
-        //
-    }
+        // Generate kode belanja otomatis
+        $latest = RiwayatBelanja::latest('id')->first();
+        $increment = $latest ? str_pad($latest->id + 1, 4, '0', STR_PAD_LEFT) : '0001';
+        $kode = 'KENB' . date('y') . $increment;
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(RiwayatBelanja $riwayatBelanja)
-    {
-        //
+        // Simpan riwayat belanja
+        RiwayatBelanja::create([
+            'kode_belanja' => $kode,
+            'barang_id' => $barang->id,
+            'tanggal_belanja' => now(),
+            'kuantiti' => $request->kuantiti,
+            'harga_beli' => $request->harga_beli,
+            'total_belanja' => $request->kuantiti * $request->harga_beli,
+        ]);
+
+        return redirect()->route('bengkel.belanja.index')
+            ->with('success', 'Belanja barang berhasil disimpan!');
     }
 }

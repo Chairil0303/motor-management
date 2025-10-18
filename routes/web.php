@@ -15,7 +15,11 @@ use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PembelianBarangController;
 use App\Http\Controllers\PenjualanBarangController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\RiwayatBelanjaController;
 
+
+use App\Models\Barang;
+use Illuminate\Http\Request;
 
 Route::get('/', function () {
     return view('welcome');
@@ -44,6 +48,11 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
     Route::resource('barang', BarangController::class)
         ->names('bengkel.barang');
 
+    // Belanja Barang Bengkel (ganti Pembelian)
+    Route::resource('riwayatbelanja', RiwayatBelanjaController::class)
+        ->names('bengkel.belanja')
+        ->except(['show']);
+
     // Pembelian Barang Bengkel
     Route::resource('pembelian', PembelianBarangController::class)
         ->names('bengkel.pembelian');
@@ -54,6 +63,14 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
 
     Route::resource('kategori', KategoriController::class)->except(['show'])
         ->names('bengkel.kategori');
+
+    Route::get('/search-barang', function (Request $request) {
+        $keyword = $request->get('keyword');
+        return Barang::where('nama_barang', 'like', "%$keyword%")
+            ->limit(10)
+            ->get(['id', 'nama_barang', 'stok', 'harga_jual']);
+    })->middleware('auth');
+
 
 });
 
@@ -71,5 +88,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
 
 require __DIR__ . '/auth.php';
