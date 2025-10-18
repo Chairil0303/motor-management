@@ -64,13 +64,12 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
     Route::resource('kategori', KategoriController::class)->except(['show'])
         ->names('bengkel.kategori');
 
-    Route::get('/search-barang', function (Request $request) {
-        $keyword = $request->get('keyword');
-        return Barang::where('nama_barang', 'like', "%$keyword%")
+    Route::get('/belanja/search-barang', function (Request $request) {
+        $query = $request->q;
+        return Barang::where('nama_barang', 'like', "%{$query}%")
             ->limit(10)
-            ->get(['id', 'nama_barang', 'stok', 'harga_jual']);
-    })->middleware('auth');
-
+            ->get(['id', 'nama_barang', 'stok', 'harga_beli', 'harga_jual']);
+    })->middleware('auth')->name('bengkel.belanja.search-barang');
 
 });
 
@@ -88,6 +87,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
 
 
 
