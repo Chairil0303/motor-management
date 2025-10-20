@@ -13,9 +13,9 @@ use App\Http\Controllers\LaporanPenjualanController;
 // kasir bengkel
 use App\Http\Controllers\BarangController;
 use App\Http\Controllers\PembelianBarangController;
-use App\Http\Controllers\PenjualanBarangController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\RiwayatBelanjaController;
+use App\Http\Controllers\PenjualanBarangController;
 
 
 use App\Models\Barang;
@@ -57,9 +57,6 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
     Route::resource('pembelian', PembelianBarangController::class)
         ->names('bengkel.pembelian');
 
-    // Penjualan Barang Bengkel
-    Route::resource('penjualan', PenjualanBarangController::class)
-        ->names('bengkel.penjualan');
 
     Route::resource('kategori', KategoriController::class)->except(['show'])
         ->names('bengkel.kategori');
@@ -118,6 +115,14 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
         ]);
     })->name('bengkel.barang.storeAjax');
 
+
+    // Penjualan Barang (kasir) — gunakan nama penjualanbarang agar tidak bentrok
+   // 🧾 Penjualan Barang (Kasir Bengkel)
+    Route::get('/penjualanbarang/search-barang', [PenjualanBarangController::class, 'searchBarang'])
+        ->name('bengkel.penjualanbarang.search');
+
+    Route::resource('penjualanbarang', PenjualanBarangController::class)
+        ->names('bengkel.penjualanbarang');
 
 });
 
