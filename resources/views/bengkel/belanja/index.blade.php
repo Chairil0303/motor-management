@@ -12,7 +12,6 @@
         </div>
 
         {{-- Filter Bulan --}}
-        {{-- Filter Bulan --}}
         <form id="filter-bulan-form" method="GET" action="{{ route('bengkel.belanja.index') }}"
             class="mb-4 flex items-center gap-3">
             <label class="font-semibold">Filter Bulan:</label>
@@ -45,6 +44,7 @@
                     <th class="p-2 border text-center">Tanggal Belanja</th>
                     <th class="p-2 border text-center">Kuantiti</th>
                     <th class="p-2 border text-right">Total Belanja (Rp)</th>
+                    <th class="p-2 border text-center w-32">Aksi</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,14 +55,30 @@
                         </td>
                         <td class="p-2 border">{{ $b->kode_belanja }}</td>
                         <td class="p-2 border">{{ $b->barang->nama_barang ?? '-' }}</td>
-                        <td class="p-2 border text-center">{{ \Carbon\Carbon::parse($b->tanggal_belanja)->format('d M Y') }}
-                        </td>
+                        <td class="p-2 border text-center">{{ \Carbon\Carbon::parse($b->tanggal_belanja)->format('d M Y') }}</td>
                         <td class="p-2 border text-center">{{ $b->kuantiti }}</td>
                         <td class="p-2 border text-right">Rp {{ number_format($b->total_belanja, 0, ',', '.') }}</td>
+                        <td class="p-2 border text-center">
+                            <div class="flex justify-center gap-2">
+                                <a href="{{ route('bengkel.belanja.edit', $b->id) }}"
+                                    class="bg-yellow-400 text-blue px-2 py-1 rounded hover:bg-yellow-500 text-xs">
+                                    Edit
+                                </a>
+                                <form class="inline delete-form" action="{{ route('bengkel.belanja.destroy', $b->id) }}"
+                                    method="POST">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button"
+                                        class="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600 text-xs btn-delete">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center p-4 text-gray-500">
+                        <td colspan="7" class="text-center p-4 text-gray-500">
                             @if(request('bulan'))
                                 Tidak ada data belanja untuk bulan
                                 {{ \Carbon\Carbon::parse(request('bulan') . '-01')->translatedFormat('F Y') }}.
@@ -80,18 +96,50 @@
         </div>
     </div>
 
+    {{-- SweetAlert2 --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const bulanInput = document.getElementById('filter-bulan-input');
             const form = document.getElementById('filter-bulan-form');
 
             if (bulanInput) {
-                // Auto submit saat user pilih bulan
                 bulanInput.addEventListener('change', function () {
                     form.submit();
                 });
             }
+
+            // konfirmasi hapus
+            document.querySelectorAll('.btn-delete').forEach(btn => {
+                btn.addEventListener('click', function (e) {
+                    const form = this.closest('form');
+                    Swal.fire({
+                        title: 'Hapus Riwayat Belanja?',
+                        text: 'Data ini akan dihapus permanen!',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#3085d6',
+                        confirmButtonText: 'Ya, hapus!'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // notif sukses
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            @endif
         });
     </script>
-
 @endsection

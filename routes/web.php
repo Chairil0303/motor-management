@@ -92,7 +92,7 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
         $validated['harga_jual'] = (int) str_replace('.', '', $validated['harga_jual'] ?? 0);
 
         // 🧾 Simpan barang baru
-        $barang = \App\Models\Barang::create($validated);
+        $barang = Barang::create($validated);
 
         // ⚙️ Generate kode belanja otomatis
         $latestBelanja = \App\Models\RiwayatBelanja::latest('id')->first();
