@@ -2,77 +2,183 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Barang;
 use App\Models\PenjualanBarang;
-use App\Models\PenjualanDetail;
+use App\Models\PenjualanBarangDetail;
+use App\Models\Barang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class PenjualanBarangController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $penjualan = PenjualanBarang::with('details.barang')->orderByDesc('tanggal_penjualan')->paginate(15);
-        return view('bengkel.penjualan.index', compact('penjualan'));
+        $query = PenjualanBarang::with('details.barang');
+
+        // filter bulan (YYYY-MM)
+        if ($request->filled('bulan')) {
+            try {
+                [$y, $m] = explode('-', $request->bulan);
+                $query->whereYear('tanggal_penjualan', $y)
+                      ->whereMonth('tanggal_penjualan', $m);
+            } catch (\Exception $e) {}
+        }
+
+        // filter tanggal spesifik (YYYY-MM-DD)
+        if ($request->filled('tanggal')) {
+            $query->whereDate('tanggal_penjualan', $request->tanggal);
+        }
+
+        $penjualans = $query->orderBy('tanggal_penjualan', 'desc')->paginate(10)->withQueryString();
+
+        return view('bengkel.penjualanbarang.index', [
+            'penjualanBarangs' => $penjualans,
+        ]);
     }
 
     public function create()
     {
-        $barang = Barang::where('stok', '>', 0)->orderBy('nama_barang')->get();
-        return view('bengkel.penjualan.create', compact('barang'));
+        // view nanti yg handle dynamic rows & search
+        return view('bengkel.penjualanbarang.create');
+    }
+
+    // AJAX endpoint untuk autocomplete search barang
+    public function searchBarang(Request $request)
+    {
+        $q = $request->q ?? '';
+        $items = Barang::where('nama_barang', 'like', "%{$q}%")
+            ->limit(10)
+            ->get(['id','nama_barang','stok','harga_jual','harga_beli']);
+        return response()->json($items);
     }
 
     public function store(Request $request)
     {
+        // ekspektasi: barang_id[] dan kuantiti[] di request
         $request->validate([
-            'tanggal_penjualan' => 'required|date',
-            'barang_id' => 'required|array',
-            'barang_id.*' => 'exists:barang,id',
-            'jumlah' => 'required|array',
-            'jumlah.*' => 'numeric|min:1',
-            'harga_satuan' => 'required|array',
-            'harga_satuan.*' => 'numeric|min:0',
+            'barang_id' => 'required|array|min:1',
+            'barang_id.*' => 'required|exists:barangs,id',
+            'kuantiti' => 'required|array',
+            'kuantiti.*' => 'required|integer|min:1',
+            'harga_jasa' => 'nullable',
         ]);
 
-        DB::transaction(function () use ($request) {
-            $year = now()->format('y');
-            $last = PenjualanBarang::whereYear('created_at', now()->year)->count() + 1;
-            $kode = 'KENJ' . $year . str_pad($last, 4, '0', STR_PAD_LEFT);
+        $barangIds = $request->input('barang_id');
+        $kuantitis = $request->input('kuantiti');
+        $hargaJasa = (float) preg_replace('/\D/', '', $request->input('harga_jasa', 0)) / 100; // if formatted with decimals; or simply cast
+        // NOTE: if harga_jasa sent as plain number without separators, adjust accordingly
+        // For safety, let's sanitize simpler:
+        $rawHargaJasa = $request->input('harga_jasa', 0);
+        $hargaJasaSanitized = (float) (preg_replace('/\D/', '', $rawHargaJasa) === '' ? 0 : preg_replace('/\D/', '', $rawHargaJasa));
+        // assuming stored with two decimals in DB; but to keep consistency, we treat as integer (no cents). We'll store as decimal: divide if needed.
+        // Simpler: treat hargaJasa as integer value in units (e.g., 100000)
+        $hargaJasa = (float) $hargaJasaSanitized;
 
-            $total = 0;
-            foreach ($request->barang_id as $i => $barang_id) {
-                $total += $request->jumlah[$i] * $request->harga_satuan[$i];
-            }
+        DB::beginTransaction();
+
+        try {
+            // create header first (kode)
+            $last = PenjualanBarang::latest('id')->first();
+            $increment = $last ? str_pad($last->id + 1, 4, '0', STR_PAD_LEFT) : '0001';
+            $kode = 'PNJB' . date('y') . $increment;
 
             $penjualan = PenjualanBarang::create([
                 'kode_penjualan' => $kode,
-                'tanggal_penjualan' => $request->tanggal_penjualan,
-                'total_harga' => $total,
+                'tanggal_penjualan' => now(),
+                'harga_jasa' => $hargaJasa,
+                'total_penjualan' => 0,
+                'total_margin' => 0,
             ]);
 
-            foreach ($request->barang_id as $i => $barang_id) {
-                $jumlah = $request->jumlah[$i];
-                $harga = $request->harga_satuan[$i];
-                $subtotal = $jumlah * $harga;
+            $totalItems = 0;
+            $totalMargin = 0;
 
-                PenjualanDetail::create([
+            foreach ($barangIds as $idx => $barangId) {
+                $qty = intval($kuantitis[$idx] ?? 0);
+                if ($qty <= 0) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('error', 'Kuantiti harus lebih dari 0');
+                }
+
+                // ambil barang dengan lock for update supaya aman concurrent
+                $barang = Barang::lockForUpdate()->findOrFail($barangId);
+
+                if ($barang->stok < $qty) {
+                    DB::rollBack();
+                    return redirect()->back()->withInput()->with('error', "Stok tidak cukup untuk barang: {$barang->nama_barang}");
+                }
+
+                $hargaJual = (float) $barang->harga_jual;
+                $hargaBeli = (float) $barang->harga_beli;
+
+                $subtotal = $hargaJual * $qty;
+                $margin = ($hargaJual - $hargaBeli) * $qty;
+
+                // create detail
+                PenjualanBarangDetail::create([
                     'penjualan_barang_id' => $penjualan->id,
-                    'barang_id' => $barang_id,
-                    'jumlah' => $jumlah,
-                    'harga_satuan' => $harga,
+                    'barang_id' => $barang->id,
+                    'kuantiti' => $qty,
+                    'harga_jual' => $hargaJual,
+                    'harga_beli' => $hargaBeli,
                     'subtotal' => $subtotal,
+                    'margin' => $margin,
                 ]);
 
-                Barang::where('id', $barang_id)->decrement('stok', $jumlah);
-            }
-        });
+                // kurangi stok
+                $barang->stok -= $qty;
+                $barang->save();
 
-        return redirect()->route('penjualan.index')->with('success', 'Penjualan barang berhasil ditambahkan!');
+                $totalItems += $subtotal;
+                $totalMargin += $margin;
+            }
+
+            // update header totals
+            $penjualan->update([
+                'total_penjualan' => $totalItems + $hargaJasa,
+                'total_margin' => $totalMargin,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('bengkel.penjualanbarang.index')
+                ->with('success', 'Transaksi penjualan berhasil disimpan!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // log error jika perlu
+            \Log::error('Penjualan store error: '.$e->getMessage());
+            return redirect()->back()->withInput()->with('error', 'Gagal menyimpan transaksi: '.$e->getMessage());
+        }
     }
 
-    public function destroy(PenjualanBarang $penjualan)
+    public function show($id)
     {
-        $penjualan->delete();
-        return redirect()->route('penjualan.index')->with('success', 'Data penjualan berhasil dihapus!');
+        $penjualan = PenjualanBarang::with('details.barang')->findOrFail($id);
+        return view('bengkel.penjualanbarang.show', compact('penjualan'));
+    }
+
+    public function destroy($id)
+    {
+        $penjualan = PenjualanBarang::with('details')->findOrFail($id);
+
+        DB::beginTransaction();
+        try {
+            // restore stok
+            foreach ($penjualan->details as $detail) {
+                $barang = Barang::find($detail->barang_id);
+                if ($barang) {
+                    $barang->stok += $detail->kuantiti;
+                    $barang->save();
+                }
+            }
+
+            $penjualan->delete();
+
+            DB::commit();
+            return redirect()->route('bengkel.penjualanbarang.index')->with('success', 'Transaksi berhasil dihapus dan stok dikembalikan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Penjualan destroy error: '.$e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus transaksi: '.$e->getMessage());
+        }
     }
 }

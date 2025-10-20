@@ -60,15 +60,15 @@
                     Barang</a>
             </li>
             <li>
+                <a href="{{ route('bengkel.penjualanbarang.index') }}" class="block px-4 py-2 hover:bg-gray-200">
+                    💸 Jual Barang
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('bengkel.kategori.index') }}" class="block px-4 py-2 hover:bg-gray-200">
                     🗂️ Kategori Barang
                 </a>
             </li>
-            <li>
-                <a href="{{ route('bengkel.penjualan.index') }}" class="block px-4 py-2 hover:bg-gray-200">💸 Penjualan
-                    Barang</a>
-            </li>
-
             <!-- Motor Section -->
             <li class="mt-4 px-4 text-gray-500 uppercase text-xs font-semibold">Motor</li>
             <li>
