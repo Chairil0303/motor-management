@@ -7,6 +7,7 @@ use App\Models\PenjualanBarangDetail;
 use App\Models\Barang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PenjualanBarangController extends Controller
 {
@@ -51,6 +52,103 @@ class PenjualanBarangController extends Controller
             ->limit(10)
             ->get(['id','nama_barang','stok','harga_jual','harga_beli']);
         return response()->json($items);
+    }
+
+    public function edit($id)
+    {
+        // Ambil data penjualan beserta detail barang
+        $penjualan = PenjualanBarang::with('details.barang')->findOrFail($id);
+
+        return view('bengkel.penjualanbarang.edit', compact('penjualan'));
+    }
+
+
+    // update/edit transaksi
+    public function update(Request $request, $id)
+    {
+        // 1. Validasi Input
+        $request->validate([
+            'barang_id'   => 'required|array|min:1',
+            'barang_id.*' => 'exists:barangs,id',
+            'kuantiti'    => 'required|array',
+            'kuantiti.*'  => 'integer|min:1',
+            'harga_jasa'  => 'nullable',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $penjualan = PenjualanBarang::with('details')->findOrFail($id);
+
+            // 2. Balik Stok Barang Lama
+            // Iterasi detail lama untuk mengembalikan stok ke Barang
+            foreach ($penjualan->details as $detail) {
+                if ($barang = Barang::find($detail->barang_id)) {
+                    $barang->stok += $detail->kuantiti;
+                    $barang->save();
+                }
+            }
+
+            // 3. Hapus Detail Lama
+            $penjualan->details()->delete();
+
+            $totalPenjualan = 0;
+            $totalMargin    = 0;
+
+            // 4. Proses dan Buat Detail Baru
+            foreach ($request->barang_id as $i => $barangId) {
+                $qty = (int) $request->kuantiti[$i];
+
+                // Lock the row to prevent race conditions during stock update
+                $barang = Barang::lockForUpdate()->findOrFail($barangId);
+
+                if ($barang->stok < $qty) {
+                    DB::rollBack();
+                    return back()->with('error', "Stok tidak cukup untuk {$barang->nama_barang}. Stok saat ini: {$barang->stok}");
+                }
+
+                // Kurangi stok barang
+                $barang->stok -= $qty;
+                $barang->save();
+
+                $subtotal = $barang->harga_jual * $qty;
+                $margin   = ($barang->harga_jual - $barang->harga_beli) * $qty;
+
+                // Buat detail penjualan baru
+                PenjualanBarangDetail::create([
+                    'penjualan_barang_id' => $penjualan->id,
+                    'barang_id'           => $barang->id,
+                    'kuantiti'            => $qty,
+                    'harga_jual'          => $barang->harga_jual,
+                    'harga_beli'          => $barang->harga_beli,
+                    'subtotal'            => $subtotal,
+                    'margin'              => $margin,
+                ]);
+
+                $totalPenjualan += $subtotal;
+                $totalMargin    += $margin;
+            }
+
+            // 5. Update Transaksi Utama
+            // Bersihkan format Rupiah (e.g., "1.000.000" menjadi 1000000)
+            $hargaJasa = (float) preg_replace('/[^\d]/', '', $request->harga_jasa ?? 0);
+
+            $penjualan->update([
+                'harga_jasa'      => $hargaJasa,
+                'total_penjualan' => $totalPenjualan + $hargaJasa,
+                'total_margin'    => $totalMargin,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('bengkel.penjualanbarang.index')->with('success', 'Transaksi berhasil diperbarui!');
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Catat error untuk debugging
+            Log::error('Penjualan update error: ' . $e->getMessage());
+            
+            return back()->with('error', 'Gagal update transaksi. Silakan coba lagi.');
+        }
     }
 
     public function store(Request $request)
