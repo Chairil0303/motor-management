@@ -51,8 +51,8 @@ class RiwayatBelanjaController extends Controller
         ]);
 
         // 🔧 Hilangkan semua titik (.) sebelum convert ke angka
-        $hargaBeli = str_replace('.', '', $request->harga_beli);
-        $hargaJual = str_replace('.', '', $request->harga_jual ?? 0);
+        $hargaBeli = (int) preg_replace('/\D/', '', $request->harga_beli);
+        $hargaJual = (int) preg_replace('/\D/', '', $request->harga_jual ?? 0);
 
         $barang = Barang::find($request->barang_id);
 
