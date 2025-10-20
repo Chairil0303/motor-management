@@ -10,50 +10,48 @@
         </a>
     </div>
 
-    <form method="GET" class="mb-4 flex gap-2">
+    {{-- Filter --}}
+    <form method="GET" class="mb-4 flex gap-2" id="filterForm">
         <input type="month" name="bulan" value="{{ request('bulan') }}" 
-               class="border rounded p-2">
+               class="border rounded p-2 auto-submit">
         <input type="date" name="tanggal" value="{{ request('tanggal') }}" 
-               class="border rounded p-2">
-        <button type="submit" class="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700">
-            Filter
-        </button>
+               class="border rounded p-2 auto-submit">
         <a href="{{ route('bengkel.penjualanbarang.index') }}" 
            class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">
             Reset
         </a>
     </form>
 
-    <div class="overflow-x-auto bg-white shadow-md rounded-lg">
-        <table class="min-w-full border">
+    {{-- Table --}}
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+        <table class="w-full border border-collapse">
             <thead class="bg-gray-100">
                 <tr class="text-left">
                     <th class="p-2 border">Kode Penjualan</th>
                     <th class="p-2 border">Tanggal</th>
-                    <th class="p-2 border">Detail Barang</th>
-                    <th class="p-2 border">Total Penjualan</th>
-                    <th class="p-2 border">Total Margin</th>
-                    <th class="p-2 border">Harga Jasa</th>
-                    <th class="p-2 border">Aksi</th>
+                    <th class="p-2 border text-center">Detail Transaksi</th>
+                    <th class="p-2 border text-right">Total Penjualan</th>
+                    <th class="p-2 border text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($penjualanBarangs as $pj)
                     <tr>
                         <td class="p-2 border">{{ $pj->kode_penjualan }}</td>
-                        <td class="p-2 border">{{ \Carbon\Carbon::parse($pj->tanggal_penjualan)->format('d M Y H:i') }}</td>
-                        <td class="p-2 border">
-                            <ul class="list-disc ml-4">
-                                @foreach ($pj->details as $detail)
-                                    <li>{{ $detail->barang->nama_barang }} (x{{ $detail->kuantiti }})</li>
-                                @endforeach
-                            </ul>
+                        <td class="p-2 border">{{ \Carbon\Carbon::parse($pj->tanggal_penjualan)->format('d M Y') }}</td>
+                        <td class="p-2 border text-center">
+                            <button 
+                                type="button"
+                                class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
+                                data-modal-target="modal-{{ $pj->id }}">
+                                Detail
+                            </button>
+                            {{-- Include Modal --}}
+                            @include('bengkel.penjualanbarang.partials.modal-detail', ['penjualan' => $pj])
                         </td>
-                        <td class="p-2 border text-right">Rp{{ number_format($pj->total_penjualan, 0, ',', '.') }}</td>
-                        <td class="p-2 border text-right">Rp{{ number_format($pj->total_margin, 0, ',', '.') }}</td>
-                        <td class="p-2 border text-right">Rp{{ number_format($pj->harga_jasa, 0, ',', '.') }}</td>
-                        <td class="p-2 border">
-                            <div class="flex gap-2">
+                        <td class="p-2 border text-right text-green">Rp{{ number_format($pj->total_penjualan, 0, ',', '.') }}</td>
+                        <td class="p-2 border text-center  whitespace-nowrap">
+                            <div class="flex justify-center gap-2">
                                 <a href="{{ route('bengkel.penjualanbarang.edit', $pj->id) }}" 
                                    class="bg-yellow-400 px-2 py-1 rounded text-black hover:bg-yellow-500">Edit</a>
                                 <form method="POST" action="{{ route('bengkel.penjualanbarang.destroy', $pj->id) }}">
@@ -73,5 +71,38 @@
             </tbody>
         </table>
     </div>
+
+    {{-- Pagination --}}
+    <div class="mt-4">
+        {{ $penjualanBarangs->links() }}
+    </div>
 </div>
+
+{{-- JS Handler --}}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // Modal
+    document.querySelectorAll('[data-modal-target]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const id = btn.dataset.modalTarget;
+            const modal = document.getElementById(id);
+            if (modal) modal.classList.remove('hidden');
+        });
+    });
+
+    document.querySelectorAll('[data-modal-close]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const modal = btn.closest('.modal');
+            modal.classList.add('hidden');
+        });
+    });
+
+    // Auto filter (submit otomatis)
+    document.querySelectorAll('.auto-submit').forEach(input => {
+        input.addEventListener('change', () => {
+            document.getElementById('filterForm').submit();
+        });
+    });
+});
+</script>
 @endsection
