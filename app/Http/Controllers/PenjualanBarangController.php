@@ -11,29 +11,31 @@ use Illuminate\Support\Facades\DB;
 class PenjualanBarangController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = PenjualanBarang::with('details.barang');
+{
+    $query = PenjualanBarang::with('details.barang');
 
-        // filter bulan (YYYY-MM)
-        if ($request->filled('bulan')) {
-            try {
-                [$y, $m] = explode('-', $request->bulan);
-                $query->whereYear('tanggal_penjualan', $y)
-                      ->whereMonth('tanggal_penjualan', $m);
-            } catch (\Exception $e) {}
-        }
-
-        // filter tanggal spesifik (YYYY-MM-DD)
-        if ($request->filled('tanggal')) {
-            $query->whereDate('tanggal_penjualan', $request->tanggal);
-        }
-
-        $penjualans = $query->orderBy('tanggal_penjualan', 'desc')->paginate(10)->withQueryString();
-
-        return view('bengkel.penjualanbarang.index', [
-            'penjualanBarangs' => $penjualans,
-        ]);
+    if ($request->filled('bulan')) {
+        try {
+            [$y, $m] = explode('-', $request->bulan);
+            $query->whereYear('tanggal_penjualan', $y)
+                  ->whereMonth('tanggal_penjualan', $m);
+        } catch (\Exception $e) {}
     }
+
+    if ($request->filled('tanggal')) {
+        $query->whereDate('tanggal_penjualan', $request->tanggal);
+    }
+
+    // pagination jadi 20
+    $penjualans = $query->orderBy('tanggal_penjualan', 'desc')
+                        ->paginate(20)
+                        ->withQueryString();
+
+    return view('bengkel.penjualanbarang.index', [
+        'penjualanBarangs' => $penjualans,
+    ]);
+    }
+
 
     public function create()
     {
