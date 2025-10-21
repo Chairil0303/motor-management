@@ -53,10 +53,6 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
         ->names('bengkel.belanja')
         ->except(['show']);
 
-    // Pembelian Barang Bengkel
-    Route::resource('pembelian', PembelianBarangController::class)
-        ->names('bengkel.pembelian');
-
 
     Route::resource('kategori', KategoriController::class)->except(['show'])
         ->names('bengkel.kategori');

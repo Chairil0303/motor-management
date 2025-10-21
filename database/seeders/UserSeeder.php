@@ -20,7 +20,7 @@ class UserSeeder extends Seeder
 
         // User biasa
         User::create([
-            'name' => 'Budi',
+            'name' => 'Ken Motor',
             'email' => 'kenmotor@gmail.com',
             'password' => Hash::make('kenmotor99'),
             'role' => 'user', // default kalau mau
