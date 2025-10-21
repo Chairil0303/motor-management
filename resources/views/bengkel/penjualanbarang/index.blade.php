@@ -21,6 +21,10 @@
             Reset
         </a>
     </form>
+    <a href="{{ route('bengkel.penjualanbarang.cetak', request()->all()) }}" 
+    class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+    🖨️ Cetak Laporan
+    </a>
 
     {{-- Table --}}
     <div class="bg-white shadow-md rounded-lg overflow-hidden">

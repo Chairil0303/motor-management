@@ -8,6 +8,7 @@ use App\Models\Barang;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PenjualanBarangController extends Controller
 {
@@ -281,4 +282,34 @@ class PenjualanBarangController extends Controller
             return redirect()->back()->with('error', 'Gagal menghapus transaksi: '.$e->getMessage());
         }
     }
+
+    // cetak laporan penjualan 
+
+public function cetakLaporan(Request $request)
+        {
+            // Ambil filter bulan/tanggal
+            $query = $request->query();
+
+            $penjualanBarangs = PenjualanBarang::query();
+
+            if($request->bulan) {
+                $penjualanBarangs->whereMonth('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->month)
+                                ->whereYear('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->year);
+            }
+
+            if($request->tanggal) {
+                $penjualanBarangs->whereDate('tanggal_penjualan', $request->tanggal);
+            }
+
+            $penjualanBarangs = $penjualanBarangs->get();
+
+            // Generate PDF dari Blade view
+            $pdf = Pdf::loadView('bengkel.penjualanbarang.laporan-pdf', [
+                'penjualanBarangs' => $penjualanBarangs,
+                'filter' => $request->all()
+            ]);
+
+            return $pdf->download('laporan-penjualan.pdf');
+        }
+
 }
