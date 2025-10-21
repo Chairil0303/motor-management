@@ -121,11 +121,16 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
         ->names('bengkel.penjualanbarang');
 
 
-    // cetak laporan
-    Route::get('bengkel/penjualanbarang/cetak', [PenjualanBarangController::class, 'cetakLaporan'])
-    ->name('bengkel.penjualanbarang.cetak')
-    ->middleware('auth'); // optional role jika mau dibatasi
 
+    // cetak bulan
+    Route::get('bengkel/penjualanbarang/cetak-bulan', [PenjualanBarangController::class, 'cetakLaporanBulan'])
+    ->name('bengkel.penjualanbarang.cetak-bulan')
+    ->middleware('auth');
+
+    // cetak tanggal
+    Route::get('bengkel/penjualanbarang/cetak-tanggal', [PenjualanBarangController::class, 'cetakLaporanTanggal'])
+    ->name('bengkel.penjualanbarang.cetak-tanggal')
+    ->middleware('auth');
 });
 
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
 
+
 class PenjualanBarangController extends Controller
 {
     public function index(Request $request)
@@ -285,31 +286,34 @@ class PenjualanBarangController extends Controller
 
     // cetak laporan penjualan 
 
-public function cetakLaporan(Request $request)
+        // laporan bulanan
+        public function cetakLaporanBulan(Request $request)
         {
-            // Ambil filter bulan/tanggal
-            $query = $request->query();
+            $penjualanBarangs = PenjualanBarang::with('details.barang')
+                ->whereMonth('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->month)
+                ->whereYear('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->year)
+                ->get();
 
-            $penjualanBarangs = PenjualanBarang::query();
-
-            if($request->bulan) {
-                $penjualanBarangs->whereMonth('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->month)
-                                ->whereYear('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->year);
-            }
-
-            if($request->tanggal) {
-                $penjualanBarangs->whereDate('tanggal_penjualan', $request->tanggal);
-            }
-
-            $penjualanBarangs = $penjualanBarangs->get();
-
-            // Generate PDF dari Blade view
-            $pdf = Pdf::loadView('bengkel.penjualanbarang.laporan-pdf', [
+            $pdf = Pdf::loadView('bengkel.penjualanbarang.laporan-pdf-detail', [
                 'penjualanBarangs' => $penjualanBarangs,
-                'filter' => $request->all()
+                'filter' => ['bulan' => $request->bulan]
             ]);
 
-            return $pdf->download('laporan-penjualan.pdf');
+            return $pdf->download('laporan-penjualan-bulan.pdf');
         }
 
+        // laporan tanggal
+        public function cetakLaporanTanggal(Request $request)
+        {
+            $penjualanBarangs = PenjualanBarang::with('details.barang')
+                ->whereDate('tanggal_penjualan', $request->tanggal)
+                ->get();
+
+            $pdf = Pdf::loadView('bengkel.penjualanbarang.laporan-pdf-detail', [
+                'penjualanBarangs' => $penjualanBarangs,
+                'filter' => ['tanggal' => $request->tanggal]
+            ]);
+
+            return $pdf->download('laporan-penjualan-tanggal.pdf');
+        }
 }
