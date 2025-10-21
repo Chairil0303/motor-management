@@ -129,12 +129,22 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
 
 
 
-Route::resource('motor', MotorController::class)->middleware(['auth']);
-Route::resource('pelanggan', PelangganController::class)->middleware(['auth']);
-Route::resource('pembelian', PembelianController::class)->middleware(['auth']);
-Route::resource('restorasi', RestorasiController::class)->middleware(['auth']);
-Route::resource('penjualan', PenjualanController::class)->middleware(['auth']);
-Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])->name('laporan.penjualan');
+// Route::resource('motor', MotorController::class)->middleware(['auth']);
+// Route::resource('pelanggan', PelangganController::class)->middleware(['auth']);
+// Route::resource('pembelian', PembelianController::class)->middleware(['auth']);
+// Route::resource('restorasi', RestorasiController::class)->middleware(['auth']);
+// Route::resource('penjualan', PenjualanController::class)->middleware(['auth']);
+// Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])->name('laporan.penjualan');
+
+Route::middleware(['auth', 'role:superadmin'])->group(function () {
+    Route::resource('motor', MotorController::class);
+    Route::resource('pelanggan', PelangganController::class);
+    Route::resource('pembelian', PembelianController::class);
+    Route::resource('restorasi', RestorasiController::class);
+    Route::resource('penjualan', PenjualanController::class);
+    Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])->name('laporan.penjualan');
+});
+
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
