@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Laporan Penjualan Detail</title>
+    <title>Laporan Penjualan Ken Motor</title>
     <style>
         body { font-family: sans-serif; font-size: 12px; }
         h2, h3 { margin-bottom: 0; }
