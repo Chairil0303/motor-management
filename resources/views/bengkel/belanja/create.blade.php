@@ -41,7 +41,7 @@
             </div>
 
             {{-- Kuantiti --}}
-            <div>
+            <div class="mt-5">
                 <label class="block font-semibold mb-1">Kuantiti Belanja</label>
                 <input type="number" name="kuantiti" class="w-full border p-2 rounded" required min="1">
             </div>

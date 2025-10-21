@@ -2,14 +2,15 @@
 
 @section('content')
     <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-4">Stok Barang</h1>
         {{-- Header + Tombol Tambah --}}
-        <div class="flex justify-between items-center mb-4">
+        <!-- <div class="flex justify-between items-center mb-4">
             <h1 class="text-2xl font-bold">Manajemen Barang Bengkel</h1>
             <a href="{{ route('bengkel.barang.create') }}"
                 class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
                 + Tambah Barang
             </a>
-        </div>
+        </div> -->
 
         {{-- Alert sukses --}}
         @if(session('success'))

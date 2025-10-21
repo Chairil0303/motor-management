@@ -75,7 +75,7 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
         ]);
 
         // 🔧 Generate kode barang
-        $latestBarang = \App\Models\Barang::latest('id')->first();
+        $latestBarang = Barang::latest('id')->first();
         $increment = $latestBarang ? str_pad($latestBarang->id + 1, 4, '0', STR_PAD_LEFT) : '0001';
         $kodeBarang = 'BRG' . date('y') . $increment;
         $validated['kode_barang'] = $kodeBarang;
@@ -119,6 +119,12 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
 
     Route::resource('penjualanbarang', PenjualanBarangController::class)
         ->names('bengkel.penjualanbarang');
+
+
+    // cetak laporan
+    Route::get('bengkel/penjualanbarang/cetak', [PenjualanBarangController::class, 'cetakLaporan'])
+    ->name('bengkel.penjualanbarang.cetak')
+    ->middleware('auth'); // optional role jika mau dibatasi
 
 });
 
