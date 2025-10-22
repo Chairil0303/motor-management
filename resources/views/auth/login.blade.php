@@ -6,7 +6,7 @@
             <div class="flex flex-col items-center mb-6">
                 <img src="{{ asset('logo-ken.jpeg') }}" alt="Ken Motor Logo" class="w-24 h-24 mb-3">
                 <h1 class="text-2xl font-bold text-gray-800 tracking-wide">Ken Motor Management</h1>
-                <p class="text-gray-500 text-sm mt-1">Masuk untuk mengelola showroom Anda</p>
+                <p class="text-gray-500 text-sm mt-1">Silahkan masuk </p>
             </div>
 
             <!-- Session Status -->
@@ -35,18 +35,18 @@
 
                 <!-- Remember Me -->
                 <div class="flex items-center justify-between">
-                    <label for="remember_me" class="inline-flex items-center">
+                    <!-- <label for="remember_me" class="inline-flex items-center">
                         <input id="remember_me" type="checkbox"
                             class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500" name="remember">
                         <span class="ms-2 text-sm text-gray-600">{{ __('Ingat saya') }}</span>
-                    </label>
+                    </label> -->
 
-                    @if (Route::has('password.request'))
+                    <!-- @if (Route::has('password.request'))
                         <a class="text-sm text-blue-600 hover:text-blue-800 font-medium"
                             href="{{ route('password.request') }}">
                             {{ __('Lupa password?') }}
                         </a>
-                    @endif
+                    @endif -->
                 </div>
 
                 <!-- Submit Button -->
@@ -59,14 +59,16 @@
             </form>
 
             <!-- Register Link -->
-            @if (Route::has('register'))
+            <!-- @if (Route::has('register'))
                 <p class="mt-6 text-center text-sm text-gray-600">
                     {{ __("Belum punya akun?") }}
                     <a href="{{ route('register') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
                         {{ __('Daftar Sekarang') }}
                     </a>
                 </p>
-            @endif
+            @endif -->
+
+            <p class="py-3 text-center text-gray-500 text-sm mt-1">By Chairil Syahrain</p>
         </div>
     </div>
 </x-guest-layout>
