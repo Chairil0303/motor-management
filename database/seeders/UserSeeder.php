@@ -18,6 +18,13 @@ class UserSeeder extends Seeder
             'role' => 'superadmin', // <-- ini penting
         ]);
 
+         User::create([
+            'name' => 'chairil',
+            'email' => 'chairilsyahrain24@gmail.com',
+            'password' => Hash::make('superadmin'),
+            'role' => 'superadmin', // <-- ini penting
+        ]);
+
         // User biasa
         User::create([
             'name' => 'Ken Motor',
