@@ -29,49 +29,43 @@ class DashboardController extends Controller
             'totalPelanggan' => Pelanggan::count(),
             'totalPenjualan' => Penjualan::count(),
             'totalLaba'      => Penjualan::sum('laba'),
-            'motorTersedia'  => Motor::where('status', 'tersedia')->count(), // motor yang masih tersedia
+            'motorTersedia'  => Motor::where('status', 'tersedia')->count(),
         ];
 
         // --- Data Statistik Bengkel (Penjualan Barang/Jasa) ---
         $bengkelStats = [
-            'totalBarang'               => Barang::count(), // jumlah item unik di bengkel
-            'totalTransaksiBulanIni'    => PenjualanBarang::whereYear('tanggal_penjualan', $year)
+            'totalBarang'            => Barang::count(),
+            'totalTransaksiBulanIni' => PenjualanBarang::whereYear('tanggal_penjualan', $year)
                 ->whereMonth('tanggal_penjualan', $month)
                 ->count(),
-            'totalOmzetBulanIni'        => PenjualanBarang::whereYear('tanggal_penjualan', $year)
+            'totalOmzetBulanIni'     => PenjualanBarang::whereYear('tanggal_penjualan', $year)
                 ->whereMonth('tanggal_penjualan', $month)
-                ->sum(DB::raw('total_penjualan')), // termasuk jasa
+                ->sum(DB::raw('total_penjualan')),
         ];
 
-        // --- Data Chart Penjualan Showroom ---
-        $chartData = Penjualan::select(
-            DB::raw('MONTH(tanggal_jual) as bulan'),
-            DB::raw('SUM(harga_jual) as total')
-        )
-            ->groupBy('bulan')
-            ->orderBy('bulan')
+        // --- Data Chart Penjualan Bengkel (per hari di bulan ini) ---
+        $chartData = PenjualanBarang::select(
+                DB::raw('DAY(tanggal_penjualan) as hari'),
+                DB::raw('SUM(total_penjualan) as total')
+            )
+            ->whereYear('tanggal_penjualan', $year)
+            ->whereMonth('tanggal_penjualan', $month)
+            ->groupBy('hari')
+            ->orderBy('hari')
             ->get();
 
-        $chartShowroom = [
-            'bulan' => $chartData->pluck('bulan'),
-            'total' => $chartData->pluck('total'),
+        $chartBengkel = [
+            'hari'   => $chartData->pluck('hari'),
+            'total'  => $chartData->pluck('total'),
         ];
 
-        // Gabungkan semua data menjadi satu array untuk dikirim ke view
+        // Gabungkan semua data
         $data = array_merge(
             $showroomStats,
             $bengkelStats,
-            $chartShowroom
+            $chartBengkel
         );
 
         return view('dashboard.index', $data);
-        /* * Alternatif: menggunakan compact() jika tidak ingin menggunakan array_merge. 
-         * return view('dashboard.index', compact(
-         * 'showroomStats',
-         * 'bengkelStats',
-         * 'chartShowroom'
-         * )); 
-         * namun view Anda harus menyesuaikan.
-         */
     }
 }
