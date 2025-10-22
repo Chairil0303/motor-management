@@ -318,6 +318,10 @@ class PenjualanBarangController extends Controller
             }
         }
 
+        
+// 🔥 Tambahkan jasa ke total penjualan
+        $totalPenjualan += $totalJasa;  
+
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('bengkel.penjualanbarang.laporan-pdf-detail', [
             'details' => $allDetails,
             'filter' => ['bulan' => $request->bulan],

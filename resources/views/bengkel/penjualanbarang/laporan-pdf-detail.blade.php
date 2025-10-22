@@ -73,13 +73,13 @@
             <td><strong>Total Modal:</strong> Rp{{ number_format($total['modal'], 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td><strong>Total Penjualan:</strong> Rp{{ number_format($total['penjualan'], 0, ',', '.') }}</td>
-        </tr>
-        <tr>
             <td><strong>Total Margin:</strong> Rp{{ number_format($total['margin'], 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td><strong>Total Jasa:</strong> Rp{{ number_format($total['jasa'], 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Penjualan:</strong> Rp{{ number_format($total['penjualan'], 0, ',', '.') }}</td>
         </tr>
     </table>
 </body>
