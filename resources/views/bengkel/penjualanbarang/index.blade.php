@@ -79,7 +79,7 @@
                 </form>
 
                 <!-- Cetak Berdasarkan Tanggal -->
-                <form action="{{ route('bengkel.penjualanbarang.cetak-tanggal') }}" method="GET" target="_blank"
+                <form action="{{ route('bengkel.penjualanbarang.cetak-tanggal') }}" method="GET" target="_self"
                     class="flex flex-col gap-2">
                     <label class="font-medium text-sm text-gray-700">Pilih Tanggal</label>
                     <input type="date" name="tanggal"

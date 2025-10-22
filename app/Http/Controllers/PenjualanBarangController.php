@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Barryvdh\DomPDF\Facade\Pdf;
-
+use Carbon\Carbon;
 
 class PenjualanBarangController extends Controller
 {
@@ -288,32 +288,93 @@ class PenjualanBarangController extends Controller
 
         // laporan bulanan
         public function cetakLaporanBulan(Request $request)
-        {
-            $penjualanBarangs = PenjualanBarang::with('details.barang')
-                ->whereMonth('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->month)
-                ->whereYear('tanggal_penjualan', \Carbon\Carbon::parse($request->bulan)->year)
-                ->get();
+    {
+        $bulan = \Carbon\Carbon::parse($request->bulan);
+        $penjualanBarangs = PenjualanBarang::with('details.barang')
+            ->whereMonth('tanggal_penjualan', $bulan->month)
+            ->whereYear('tanggal_penjualan', $bulan->year)
+            ->get();
 
-            $pdf = Pdf::loadView('bengkel.penjualanbarang.laporan-pdf-detail', [
-                'penjualanBarangs' => $penjualanBarangs,
-                'filter' => ['bulan' => $request->bulan]
-            ]);
+        // Flatten semua detail jadi satu array
+        $allDetails = [];
+        $totalModal = $totalPenjualan = $totalMargin = $totalJasa = 0;
 
-            return $pdf->download('laporan-penjualan-bulan.pdf');
+        foreach ($penjualanBarangs as $pj) {
+            $totalJasa += $pj->harga_jasa;
+            foreach ($pj->details as $detail) {
+                $allDetails[] = [
+                    'kode_penjualan' => $pj->kode_penjualan,
+                    'nama_barang'    => $detail->barang->nama_barang . ' (' . $detail->kuantiti . ')',
+                    'harga_beli'     => $detail->harga_beli,
+                    'harga_jual'     => $detail->harga_jual,
+                    'margin'         => $detail->margin,
+                    'subtotal'       => $detail->subtotal,
+                    'harga_jasa'     => $pj->harga_jasa,
+                ];
+
+                $totalModal += $detail->harga_beli * $detail->kuantiti;
+                $totalPenjualan += $detail->subtotal;
+                $totalMargin += $detail->margin;
+            }
         }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('bengkel.penjualanbarang.laporan-pdf-detail', [
+            'details' => $allDetails,
+            'filter' => ['bulan' => $request->bulan],
+            'total' => [
+                'modal' => $totalModal,
+                'penjualan' => $totalPenjualan,
+                'margin' => $totalMargin,
+                'jasa' => $totalJasa,
+            ]
+        ])->setPaper('a4', 'portrait');
+
+        return $pdf->download('laporan-penjualan-bulanan.pdf');
+    }
+
 
         // laporan tanggal
-        public function cetakLaporanTanggal(Request $request)
-        {
-            $penjualanBarangs = PenjualanBarang::with('details.barang')
-                ->whereDate('tanggal_penjualan', $request->tanggal)
-                ->get();
 
-            $pdf = Pdf::loadView('bengkel.penjualanbarang.laporan-pdf-detail', [
-                'penjualanBarangs' => $penjualanBarangs,
-                'filter' => ['tanggal' => $request->tanggal]
-            ]);
+public function cetakLaporanTanggal(Request $request)
+{
+    // Karena <input type="date"> kirim format Y-m-d, kita langsung pakai itu.
+    $tanggalDatabase = $request->tanggal;
 
-            return $pdf->download('laporan-penjualan-tanggal.pdf');
-        }
+    // Ambil data penjualan berdasarkan tanggal
+    $penjualanBarangs = PenjualanBarang::with('details.barang')
+        ->whereDate('tanggal_penjualan', $tanggalDatabase)
+        ->get();
+
+    // Inisialisasi total
+    $totalModal = 0;
+    $totalPenjualan = 0;
+    $totalMargin = 0;
+    $totalJasa = 0;
+
+    foreach ($penjualanBarangs as $pj) {
+        $totalModal += $pj->details->sum(fn($d) => $d->harga_beli * $d->kuantiti);
+        $totalPenjualan += $pj->details->sum('subtotal');
+        $totalMargin += $pj->details->sum('margin');
+        $totalJasa += $pj->harga_jasa;
+    }
+
+    // Format tanggal untuk tampilan
+    $tanggalTampilan = Carbon::parse($tanggalDatabase)->format('d/m/Y');
+
+    // Generate PDF
+    $pdf = Pdf::loadView('bengkel.penjualanbarang.laporan-pdf-harian', [
+        'penjualanBarangs' => $penjualanBarangs,
+        'tanggal' => $tanggalTampilan,
+        'total' => [
+            'modal' => $totalModal,
+            'penjualan' => $totalPenjualan,
+            'margin' => $totalMargin,
+            'jasa' => $totalJasa,
+        ],
+    ])->setPaper('A4', 'portrait');
+
+    return $pdf->download("laporan-penjualan-harian-{$tanggalDatabase}.pdf");
+}
+
+
 }

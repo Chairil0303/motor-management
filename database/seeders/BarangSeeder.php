@@ -31,12 +31,14 @@ class BarangSeeder extends Seeder
         foreach (range(1, 10) as $i) {
             $kategori = $faker->randomElement($kategoris);
             $stok = $faker->numberBetween(10, 100);
-            $hargaBeli = $faker->numberBetween(50000, 500000);
-            $hargaJual = $hargaBeli + $faker->numberBetween(10000, 100000);
+
+            // 🔹 Harga dibulatkan ke ribuan
+            $hargaBeli = round($faker->numberBetween(50000, 500000), -3);
+            $hargaJual = round($hargaBeli + $faker->numberBetween(10000, 100000), -3);
 
             $barangs[] = Barang::create([
                 'kode_barang' => 'BRG' . str_pad($i, 4, '0', STR_PAD_LEFT),
-                'nama_barang' => $faker->word(),
+                'nama_barang' => ucfirst($faker->word()),
                 'kategori_id' => $kategori->id,
                 'stok' => $stok,
                 'harga_beli' => $hargaBeli,
