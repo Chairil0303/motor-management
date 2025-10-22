@@ -1,7 +1,8 @@
 @extends('layouts.app')
 
 @section('content')
-    <h1 class="text-3xl font-bold mb-6">Dashboard Ken Motor</h1>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>   
+    <h1 class="text-3xl font-bold">Dashboard Ken Motor</h1>
 
    <div class="p-4 lg:p-6">
     <!-- Cards -->
@@ -34,37 +35,57 @@
         </div>
     </div>
 
-<!-- Chart -->
-<div class="bg-white p-4 rounded shadow mt-6">
-    <h2 class="text-xl font-semibold mb-4">Grafik Penjualan per Bulan</h2>
-    <canvas id="chartPenjualan"></canvas>
-</div>
+    
+  <!-- Chart -->
+    <div class="bg-white p-4 rounded shadow mt-6">
+        <h2 class="text-xl font-semibold mb-4">Grafik Penjualan Bengkel (Per Hari)</h2>
 
-<script>
+        <!-- Lebih kecil: h-24 = 6rem (≈96px) -->
+        <div class="relative h-32">
+            <canvas id="chartPenjualan"></canvas>
+        </div>
+    </div>
+
+   <script>
     const ctx = document.getElementById('chartPenjualan').getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: {!! json_encode($bulan) !!},
+            labels: {!! json_encode($hari) !!},
             datasets: [{
-                label: 'Total Penjualan',
+                label: 'Total Penjualan Harian',
                 data: {!! json_encode($total) !!},
                 borderColor: '#3b82f6',
                 backgroundColor: 'rgba(59, 130, 246, 0.2)',
                 fill: true,
-                tension: 0.3
+                tension: 0.3,
+                pointRadius: 2, // titik data lebih kecil
+                borderWidth: 2
             }]
         },
         options: {
             responsive: true,
+            maintainAspectRatio: false, // wajib biar CSS tinggi berlaku
             plugins: {
-                legend: { display: true }
+                legend: { display: false } // sembunyikan legend biar makin compact
             },
             scales: {
-                y: { beginAtZero: true }
+                x: {
+                    ticks: { font: { size: 10 } },
+                    title: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    ticks: { font: { size: 10 } },
+                    title: { display: false },
+                    grid: { display: false }
+                }
+            },
+            layout: {
+                padding: 5 // sedikit jarak biar gak terlalu padat
             }
         }
     });
 </script>
-
+    
 @endsection
