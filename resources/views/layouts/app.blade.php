@@ -14,6 +14,47 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <script>
+        // Initialize Alpine.js store for sidebar state
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('sidebar', {
+                open: false, // Closed by default on mobile
+                
+                toggle() {
+                    // Only toggle on mobile (< 1024px)
+                    if (window.innerWidth < 1024) {
+                        this.open = !this.open;
+                    }
+                },
+                
+                close() {
+                    // Only close on mobile
+                    if (window.innerWidth < 1024) {
+                        this.open = false;
+                    }
+                },
+                
+                init() {
+                    // Set initial state based on screen size
+                    this.open = window.innerWidth >= 1024;
+                    
+                    // Update on window resize
+                    let resizeTimer;
+                    window.addEventListener('resize', () => {
+                        clearTimeout(resizeTimer);
+                        resizeTimer = setTimeout(() => {
+                            if (window.innerWidth >= 1024) {
+                                this.open = true;
+                            } else {
+                                this.open = false;
+                            }
+                        }, 100);
+                    });
+                }
+            });
+        });
+    </script>
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
