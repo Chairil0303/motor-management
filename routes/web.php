@@ -10,6 +10,12 @@ use App\Http\Controllers\PenjualanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LaporanPenjualanController;
 
+// kasir bengkel
+use App\Http\Controllers\BarangController;
+use App\Http\Controllers\PembelianBarangController;
+use App\Http\Controllers\PenjualanBarangController;
+
+
 Route::get('/', function () {
     return view('welcome');
 });
@@ -26,6 +32,25 @@ Route::get('/restorasi/detail/{motorId}', [RestorasiController::class, 'detail']
     ->name('restorasi.detail');
 Route::put('restorasi/update/{id}', [RestorasiController::class, 'updateInline'])->name('restorasi.updateInline');
 Route::delete('restorasi/delete/{id}', [RestorasiController::class, 'deleteInline'])->name('restorasi.deleteInline');
+
+
+
+// bengkel motor
+// bengkel motor
+Route::middleware(['auth'])->prefix('bengkel')->group(function () {
+
+    // Manajemen Stok Barang
+    Route::resource('barang', BarangController::class)
+        ->names('bengkel.barang');
+
+    // Pembelian Barang Bengkel
+    Route::resource('pembelian', PembelianBarangController::class)
+        ->names('bengkel.pembelian');
+
+    // Penjualan Barang Bengkel
+    Route::resource('penjualan', PenjualanBarangController::class)
+        ->names('bengkel.penjualan');
+});
 
 
 

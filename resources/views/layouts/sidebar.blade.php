@@ -39,14 +39,30 @@
     </div>
     <nav class="mt-4">
         <ul>
+            <!-- Main -->
             <li>
-                <a href="{{ route('dashboard') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">🏠 Dashboard</a>
+                <a href="{{ route('dashboard') }}" class="block px-4 py-2 hover:bg-gray-200">🏠 Dashboard</a>
+            </li>
+
+            <!-- Bengkel Section -->
+            <li class="mt-4 px-4 text-gray-500 uppercase text-xs font-semibold">Bengkel</li>
+            <li>
+                <a href="{{ route('bengkel.barang.index') }}" class="block px-4 py-2 hover:bg-gray-200">📦 Barang
+                    Bengkel</a>
             </li>
             <li>
-                <a href="{{ route('pembelian.index') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">🧾 Pembelian</a>
+                <a href="{{ route('bengkel.pembelian.index') }}" class="block px-4 py-2 hover:bg-gray-200">🧾 Pembelian
+                    Barang</a>
             </li>
             <li>
-                <a href="{{ route('motor.index') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">🛵 Motor</a>
+                <a href="{{ route('bengkel.penjualan.index') }}" class="block px-4 py-2 hover:bg-gray-200">💸 Penjualan
+                    Barang</a>
+            </li>
+
+            <!-- Motor Section -->
+            <li class="mt-4 px-4 text-gray-500 uppercase text-xs font-semibold">Motor</li>
+            <li>
+                <a href="{{ route('motor.index') }}" class="block px-4 py-2 hover:bg-gray-200">🛵 Motor</a>
             </li>
             <li>
                 <a href="{{ route('pelanggan.index') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">👤 Pelanggan</a>
@@ -57,6 +73,9 @@
             <li>
                 <a href="{{ route('penjualan.index') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">💰 Jual Motor</a>
             </li>
+
+            <!-- Report Section -->
+            <li class="mt-4 px-4 text-gray-500 uppercase text-xs font-semibold">Laporan</li>
             <li>
                 <a href="{{ route('laporan.penjualan') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">📊 Laporan
                     Penjualan</a>
