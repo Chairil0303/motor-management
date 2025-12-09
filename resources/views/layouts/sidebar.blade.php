@@ -42,9 +42,45 @@
             <li>
                 <a href="{{ route('dashboard') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">🏠 Dashboard</a>
             </li>
+
+            <!-- Bengkel -->
+            <li class="mt-6 mb-2 px-4">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Bengkel</div>
+            </li>
+
+            @php
+                $bengkelItems = [
+                    ['route' => 'bengkel.barang.index', 'icon' => '📦', 'label' => 'Barang Bengkel'],
+                    ['route' => 'bengkel.belanja.index', 'icon' => '🧾', 'label' => 'Belanja Barang'],
+                    ['route' => 'bengkel.penjualanbarang.index', 'icon' => '💸', 'label' => 'Jual Barang'],
+                    ['route' => 'bengkel.kategori.index', 'icon' => '🗂️', 'label' => 'Kategori Barang'],
+                ];
+            @endphp
+
+            @foreach($bengkelItems as $item)
             <li>
                 <a href="{{ route('pembelian.index') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">🧾 Pembelian</a>
             </li>
+            @endforeach
+
+            <!-- Superadmin -->
+            @if(auth()->user()->role === 'superadmin')
+            <li class="mt-6 mb-2 px-4">
+                <div class="text-xs font-semibold text-gray-500 uppercase">Motor</div>
+            </li>
+
+            @php
+                $motorItems = [
+                    ['route' => 'pembelian.index', 'icon' => '🧾', 'label' => 'Beli Motor'],
+                    ['route' => 'motor.index', 'icon' => '🛵', 'label' => 'Motor'],
+                    ['route' => 'pelanggan.index', 'icon' => '👤', 'label' => 'Pelanggan'],
+                    ['route' => 'restorasi.index', 'icon' => '🛠️', 'label' => 'Restorasi'],
+                    ['route' => 'penjualan.index', 'icon' => '💰', 'label' => 'Jual Motor'],
+                    ['route' => 'laporan.penjualan', 'icon' => '📊', 'label' => 'Laporan Penjualan'],
+                ];
+            @endphp
+
+            @foreach($motorItems as $item)
             <li>
                 <a href="{{ route('motor.index') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">🛵 Motor</a>
             </li>
@@ -61,6 +97,7 @@
                 <a href="{{ route('laporan.penjualan') }}" class="block px-4 py-2 hover:bg-gray-200" @click="$store.sidebar.close()">📊 Laporan
                     Penjualan</a>
             </li>
+
         </ul>
     </nav>
 </aside>

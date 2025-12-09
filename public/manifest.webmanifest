@@ -1,0 +1,20 @@
+{
+  "name": "Ken Motor",
+  "short_name": "KenMotor",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1e40af",
+  "icons": [
+    {
+      "src": "/logo-ken.png",
+      "sizes": "300x300",
+      "type": "image/png"
+    },
+    {
+      "src": "/logo-ken.png",
+      "sizes": "700x700",
+      "type": "image/png"
+    }
+  ]
+}

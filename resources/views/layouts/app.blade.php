@@ -6,39 +6,47 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('title', 'Ken Motor')</title>
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
+    <!-- Favicon -->
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <script>
         // Initialize Alpine.js store for sidebar state
         document.addEventListener('alpine:init', () => {
             Alpine.store('sidebar', {
                 open: false, // Closed by default on mobile
-                
+
                 toggle() {
                     // Only toggle on mobile (< 1024px)
                     if (window.innerWidth < 1024) {
                         this.open = !this.open;
                     }
                 },
-                
+
                 close() {
                     // Only close on mobile
                     if (window.innerWidth < 1024) {
                         this.open = false;
                     }
                 },
-                
+
                 init() {
                     // Set initial state based on screen size
                     this.open = window.innerWidth >= 1024;
-                    
+
                     // Update on window resize
                     let resizeTimer;
                     window.addEventListener('resize', () => {
@@ -58,29 +66,78 @@
 </head>
 
 <body class="font-sans antialiased bg-gray-100">
-    <div class="flex min-h-screen">
-        {{-- Sidebar --}}
+    <div x-data x-init="
+        Alpine.store('sidebar', {
+            isMobile: window.innerWidth < 1024,
+            isOpen: window.innerWidth >= 1024,
+
+            toggle() {
+                if (this.isMobile) this.isOpen = !this.isOpen
+            },
+            close() {
+                if (this.isMobile) this.isOpen = false
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            const s = Alpine.store('sidebar');
+            s.isMobile = window.innerWidth < 1024;
+            s.isOpen = !s.isMobile;
+        });
+    " class="flex min-h-screen">
+
+        <!-- Overlay mobile -->
+        <div x-show="$store.sidebar.isOpen && $store.sidebar.isMobile" @click="$store.sidebar.close()"
+            class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" x-cloak>
+        </div>
+
+        <!-- SIDEBAR -->
         @include('layouts.sidebar')
 
-        {{-- Main Content --}}
-        <div class="flex-1 flex flex-col">
-            @include('layouts.navigation')
+        <!-- MAIN CONTENT -->
+        <div class="flex-1 flex flex-col w-full min-w-0">
 
-            <!-- Page Heading -->
-            @isset($header)
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endisset
+            <!-- Mobile Header -->
+            <div
+                class="lg:hidden bg-white border-b px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+                <button @click="$store.sidebar.toggle()"
+                    class="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100">
+                    <!-- Hamburger -->
+                    <svg x-show="!$store.sidebar.isOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
 
-            <!-- Page Content -->
-            <main class="p-6">
-                @yield('content')
+                    <!-- Close -->
+                    <svg x-show="$store.sidebar.isOpen" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                <div class="text-lg font-semibold text-gray-800 truncate ml-2">
+                    @yield('page-title', 'Ken Motor')
+                </div>
+
+                <div class="w-8"></div>
+            </div>
+
+            <!-- Desktop Nav -->
+            <div class="hidden lg:block">
+                @include('layouts.navigation')
+            </div>
+
+            <!-- PAGE CONTENT -->
+            <main class="flex-1 p-4 sm:p-6 overflow-x-auto">
+                <div class="max-w-7xl mx-auto">
+                    @yield('content')
+                </div>
             </main>
         </div>
     </div>
 </body>
+
 
 </html>

@@ -2,40 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Barang;
 use App\Models\Motor;
 use App\Models\Pelanggan;
 use App\Models\Penjualan;
+use App\Models\PenjualanBarang;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
+    /**
+     * Tampilkan halaman dashboard dengan data statistik.
+     *
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
-        // Card Data
-        $totalMotor = Motor::count();
-        $totalPelanggan = Pelanggan::count();
-        $totalPenjualan = Penjualan::count();
-        $totalLaba = Penjualan::sum('laba');
+        $now = Carbon::now();
+        $year = $now->year;
+        $month = $now->month;
 
-        // Chart Data - penjualan per bulan
-        $chartData = Penjualan::select(
-            DB::raw('MONTH(tanggal_jual) as bulan'),
-            DB::raw('SUM(harga_jual) as total')
-        )
-            ->groupBy('bulan')
-            ->orderBy('bulan')
+        // --- Data Statistik Showroom (Penjualan Motor) ---
+        $showroomStats = [
+            'totalMotor'     => Motor::count(),
+            'totalPelanggan' => Pelanggan::count(),
+            'totalPenjualan' => Penjualan::count(),
+            'totalLaba'      => Penjualan::sum('laba'),
+            'motorTersedia'  => Motor::where('status', 'tersedia')->count(),
+        ];
+
+        // --- Data Statistik Bengkel (Penjualan Barang/Jasa) ---
+        $bengkelStats = [
+            'totalBarang'            => Barang::count(),
+            'totalTransaksiBulanIni' => PenjualanBarang::whereYear('tanggal_penjualan', $year)
+                ->whereMonth('tanggal_penjualan', $month)
+                ->count(),
+            'totalOmzetBulanIni'     => PenjualanBarang::whereYear('tanggal_penjualan', $year)
+                ->whereMonth('tanggal_penjualan', $month)
+                ->sum(DB::raw('total_penjualan')),
+        ];
+
+        // --- Data Chart Penjualan Bengkel (per hari di bulan ini) ---
+        $chartData = PenjualanBarang::select(
+                DB::raw('DAY(tanggal_penjualan) as hari'),
+                DB::raw('SUM(total_penjualan) as total')
+            )
+            ->whereYear('tanggal_penjualan', $year)
+            ->whereMonth('tanggal_penjualan', $month)
+            ->groupBy('hari')
+            ->orderBy('hari')
             ->get();
 
-        $bulan = $chartData->pluck('bulan');
-        $total = $chartData->pluck('total');
+        $chartBengkel = [
+            'hari'   => $chartData->pluck('hari'),
+            'total'  => $chartData->pluck('total'),
+        ];
 
-        return view('dashboard.index', compact(
-            'totalMotor',
-            'totalPelanggan',
-            'totalPenjualan',
-            'totalLaba',
-            'bulan',
-            'total'
-        ));
+        // Gabungkan semua data
+        $data = array_merge(
+            $showroomStats,
+            $bengkelStats,
+            $chartBengkel
+        );
+
+        return view('dashboard.index', $data);
     }
 }
