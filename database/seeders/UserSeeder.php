@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             'role' => 'superadmin', // <-- ini penting
         ]);
 
-         User::create([
+        User::create([
             'name' => 'chairil',
             'email' => 'chairilsyahrain24@gmail.com',
             'password' => Hash::make('superadmin'),
@@ -31,6 +31,13 @@ class UserSeeder extends Seeder
             'email' => 'kenmotor@gmail.com',
             'password' => Hash::make('kenmotor99'),
             'role' => 'user', // default kalau mau
+        ]);
+
+        User::create([
+            'name' => 'Admin Showroom',
+            'email' => 'showroom@gmail.com',
+            'password' => Hash::make('adminshowroom'),
+            'role' => 'adminshowroom',
         ]);
     }
 }

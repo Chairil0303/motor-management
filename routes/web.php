@@ -42,7 +42,7 @@ Route::delete('restorasi/delete/{id}', [RestorasiController::class, 'deleteInlin
 
 // bengkel motor
 // bengkel motor
-Route::middleware(['auth'])->prefix('bengkel')->group(function () {
+Route::middleware(['auth', 'role:superadmin,user'])->prefix('bengkel')->group(function () {
 
     // Manajemen Stok Barang
     Route::resource('barang', BarangController::class)
@@ -113,7 +113,7 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
 
 
     // Penjualan Barang (kasir) — gunakan nama penjualanbarang agar tidak bentrok
-   // 🧾 Penjualan Barang (Kasir Bengkel)
+    // 🧾 Penjualan Barang (Kasir Bengkel)
     Route::get('/penjualanbarang/search-barang', [PenjualanBarangController::class, 'searchBarang'])
         ->name('bengkel.penjualanbarang.search');
 
@@ -124,13 +124,13 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
 
     // cetak bulan
     Route::get('bengkel/penjualanbarang/cetak-bulan', [PenjualanBarangController::class, 'cetakLaporanBulan'])
-    ->name('bengkel.penjualanbarang.cetak-bulan')
-    ->middleware('auth');
+        ->name('bengkel.penjualanbarang.cetak-bulan')
+        ->middleware('auth');
 
     // cetak tanggal
     Route::get('bengkel/penjualanbarang/cetak-tanggal', [PenjualanBarangController::class, 'cetakLaporanTanggal'])
-    ->name('bengkel.penjualanbarang.cetak-tanggal')
-    ->middleware('auth');
+        ->name('bengkel.penjualanbarang.cetak-tanggal')
+        ->middleware('auth');
 });
 
 
@@ -143,14 +143,16 @@ Route::middleware(['auth'])->prefix('bengkel')->group(function () {
 // Route::resource('penjualan', PenjualanController::class)->middleware(['auth']);
 // Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])->name('laporan.penjualan');
 
-Route::middleware(['auth', 'role:superadmin'])->group(function () {
+Route::middleware(['auth', 'role:superadmin,adminshowroom'])->group(function () {
     Route::resource('motor', MotorController::class);
     Route::resource('pelanggan', PelangganController::class);
     Route::resource('pembelian', PembelianController::class);
     Route::resource('restorasi', RestorasiController::class);
     Route::resource('penjualan', PenjualanController::class);
-    Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])->name('laporan.penjualan');
+    Route::get('/laporan-penjualan', [LaporanPenjualanController::class, 'index'])
+        ->name('laporan.penjualan');
 });
+
 
 
 Route::middleware('auth')->group(function () {

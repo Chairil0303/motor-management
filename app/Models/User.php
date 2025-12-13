@@ -21,6 +21,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -44,5 +45,32 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function isSuperadmin(): bool
+    {
+        return $this->role === 'superadmin';
+    }
+
+    public function isAdminShowroom(): bool
+    {
+        return $this->role === 'adminshowroom';
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === 'user';
+    }
+
+    // ===== Permission-like helpers =====
+
+    public function canAccessShowroom(): bool
+    {
+        return in_array($this->role, ['superadmin', 'adminshowroom']);
+    }
+
+    public function canAccessBengkel(): bool
+    {
+        return in_array($this->role, ['superadmin', 'user']);
     }
 }
